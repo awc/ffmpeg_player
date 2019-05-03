@@ -67,10 +67,12 @@ private:
             "attribute vec4 aPosition;\n"
             "attribute vec4 aTextureCoordinate;\n"
             "varying vec2 vTextureCoord;\n"
+            "varying vec2 vPosition;\n"
             "void main()\n"
             "{\n"
             "    vTextureCoord = (uTextureMatrix * aTextureCoordinate).xy;\n"
             "    gl_Position = aPosition;\n"
+            "    vPosition = aPosition.xy;\n"
             "}\n"
     };
     const char *fragment_shader_string = {
@@ -79,6 +81,7 @@ private:
             "uniform sampler2D uTextureU;\n"
             "uniform sampler2D uTextureV;\n"
             "varying vec2 vTextureCoord;\n"
+            "varying vec2 vPosition;\n"
             "void main()\n"
             "{\n"
             "    vec3 YUV;\n"
@@ -87,7 +90,11 @@ private:
             "    YUV.y = texture2D(uTextureU, vTextureCoord).r - 0.5;\n"
             "    YUV.z = texture2D(uTextureV, vTextureCoord).r - 0.5;\n"
             "    RGB = mat3(1.0, 1.0, 1.0, 0.0, -0.39465, 2.03211, 1.13983, -0.58060, 0.0) * YUV;\n"
-            "    gl_FragColor = vec4(RGB, 1.0);\n"
+            "    if(vPosition.x > 0.0 && vPosition.y> 0.0) {\n"
+            "       gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+            "    } else {\n"
+            "       gl_FragColor = vec4(RGB, 1.0);\n"
+            "    }\n"
             "}\n"
     };
 

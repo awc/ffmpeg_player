@@ -68,23 +68,19 @@ void *ffmpeg_decoder::trampoline(void *p) {
     int size = codecContext->width * codecContext->height;
     auto *packet = static_cast<AVPacket *>(malloc(sizeof(AVPacket)));
     av_new_packet(packet, size);
-    AVFrame *yuvFrame = av_frame_alloc();
+//    AVFrame *yuvFrame = av_frame_alloc();
     //缓冲区分配内存
-//    uint8_t *out_buffer = (uint8_t *) av_malloc(
-//            avpicture_get_size(AV_PIX_FMT_YUV420P, codecContext->width, codecContext->height));
-//    avpicture_fill((AVPicture *) yuvFrame, out_buffer, AV_PIX_FMT_YUV420P, codecContext->width, codecContext->height);
-
-    int numBytes=av_image_get_buffer_size(AV_PIX_FMT_YUV420P, codecContext->width, codecContext->height, 1);
-    uint8_t * buffer=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
-    av_image_fill_arrays(yuvFrame->data, yuvFrame->linesize, buffer, AV_PIX_FMT_YUV420P,
-                         codecContext->width, codecContext->height, 1);
-    //用于转码（缩放）的参数，转之前的宽高，转之后的宽高，格式等
-    struct SwsContext *sws_ctx = sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
-                                                codecContext->width, codecContext->height, AV_PIX_FMT_YUV420P,
-                                                SWS_BILINEAR, nullptr, nullptr, nullptr);
+//    int numBytes=av_image_get_buffer_size(AV_PIX_FMT_YUV420P, codecContext->width, codecContext->height, 1);
+//    uint8_t * buffer=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
+//    av_image_fill_arrays(yuvFrame->data, yuvFrame->linesize, buffer, AV_PIX_FMT_YUV420P,
+//                         codecContext->width, codecContext->height, 1);
+//    //用于转码（缩放）的参数，转之前的宽高，转之后的宽高，格式等
+//    struct SwsContext *sws_ctx = sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
+//                                                codecContext->width, codecContext->height, AV_PIX_FMT_YUV420P,
+//                                                SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
     int ret;
-    while (true) {
+    while (codecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
         if (av_read_frame(formatContext, packet) < 0) {
             ALOGD("read frame end")
             break;
@@ -103,17 +99,14 @@ void *ffmpeg_decoder::trampoline(void *p) {
             if (ret < 0 && ret != AVERROR_EOF) {
                 ALOGD("avcodec receive frame ret = %d", ret);
                 av_packet_unref(packet);
+                av_frame_unref(pFrame);
                 continue;
             }
-            sws_scale(sws_ctx, (const uint8_t *const *) pFrame->data, pFrame->linesize, 0, codecContext->height,
-                      yuvFrame->data, yuvFrame->linesize);
-            //pFrame
-//            auto *yuv420P = new YUV420P();
-//            yuv420P->luma = pFrame->data[0];
-//            yuv420P->chromaB = pFrame->data[1];
-//            yuv420P->chromaR = pFrame->data[2];
-//            yuv420P->pts = pFrame->pts;
+//            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
+//                      pFrame->data, pFrame->linesize);
+            __android_log_print(ANDROID_LOG_DEBUG, "123", ", %d: %d", static_cast<int>(pFrame->pts), pFrame->height);
             looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
+
             av_packet_unref(packet);
         }
 

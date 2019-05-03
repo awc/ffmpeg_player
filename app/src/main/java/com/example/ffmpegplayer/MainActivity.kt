@@ -28,13 +28,14 @@ class MainActivity : AppCompatActivity() {
                 PERMISSION_CODE
             )
         } else {
-            startNativePlayerActivity()
+//            startNativePlayerActivity()
         }
+        play.setOnClickListener { startNativePlayerActivity() }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startNativePlayerActivity()
+//            startNativePlayerActivity()
         } else {
             Toast.makeText(this, "must need write external storage permission!", Toast.LENGTH_LONG).show()
         }

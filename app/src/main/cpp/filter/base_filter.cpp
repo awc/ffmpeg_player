@@ -56,25 +56,24 @@ void base_filter::drawFrame(AVFrame *avFrame) {
     glUniformMatrix4fv(uTextureMatrixLocation, 1, GL_FALSE, this->textureMatrix->m);
 
     uTextureYLocation = glGetUniformLocation(program, uTextureY);
+    glUniform1i(uTextureYLocation, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, yTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, avFrame->data[0]);
-    glUniform1i(uTextureYLocation, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, avFrame->data[0]);
 
     uTextureULocation = glGetUniformLocation(program, uTextureU);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, uTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                    avFrame->data[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width / 2, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 avFrame->data[1]);
     glUniform1i(uTextureULocation, 1);
 
     uTextureVLocation = glGetUniformLocation(program, uTextureV);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, vTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                    avFrame->data[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width / 2, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 avFrame->data[2]);
     glUniform1i(uTextureVLocation, 2);
-
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glDisableVertexAttribArray(aPositionLocation);
