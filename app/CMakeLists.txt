@@ -18,7 +18,8 @@ add_library(native-lib
 
         src/main/cpp/filter/base_filter.cpp
 
-        src/main/cpp/decoder/ffmpeg_decoder.cpp
+        src/main/cpp/decoder/video_decoder.cpp
+        src/main/cpp/decoder/audio_decoder.cpp
         )
 
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/src/main/jniLibs)

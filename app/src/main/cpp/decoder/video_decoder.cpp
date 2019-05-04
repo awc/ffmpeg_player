@@ -3,7 +3,7 @@
 //
 
 #include <pthread.h>
-#include "ffmpeg_decoder.h"
+#include "video_decoder.h"
 #include "../common/native_log.h"
 
 extern "C" {
@@ -13,15 +13,15 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-ffmpeg_decoder::ffmpeg_decoder() {
+video_decoder::video_decoder() {
 
 }
 
-ffmpeg_decoder::~ffmpeg_decoder() {
+video_decoder::~video_decoder() {
 
 }
 
-void ffmpeg_decoder::decode(const char *url, gl_looper *looper) {
+void video_decoder::decode(const char *url, gl_looper *looper) {
     this->url = url;
     this->looper = looper;
     //decode thread
@@ -30,9 +30,9 @@ void ffmpeg_decoder::decode(const char *url, gl_looper *looper) {
     pthread_create(&workder_thread, &attr, trampoline, this);
 }
 
-void *ffmpeg_decoder::trampoline(void *p) {
-    const char *url = ((ffmpeg_decoder *) p)->url;
-    gl_looper *looper = ((ffmpeg_decoder *) p)->looper;
+void *video_decoder::trampoline(void *p) {
+    const char *url = ((video_decoder *) p)->url;
+    gl_looper *looper = ((video_decoder *) p)->looper;
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
@@ -108,7 +108,8 @@ void *ffmpeg_decoder::trampoline(void *p) {
             av_packet_unref(packet);
         }
     }
-    avcodec_free_context(&codecContext);
-    avformat_free_context(formatContext);
+    av_packet_free(&packet);
+    avcodec_close(codecContext);
+    avformat_close_input(&formatContext);
     return nullptr;
 }

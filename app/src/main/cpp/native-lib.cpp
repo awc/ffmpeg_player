@@ -12,7 +12,8 @@ extern "C" {
 }
 
 #include "render/gl_looper.h"
-#include "decoder/ffmpeg_decoder.h"
+#include "decoder/video_decoder.h"
+#include "decoder/audio_decoder.h"
 
 static JavaVM *g_vm;
 
@@ -52,17 +53,20 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, job
     }
 }
 
-ffmpeg_decoder *ffmpegDecoder = nullptr;
+video_decoder *videoDecoder = nullptr;
+audio_decoder *audioDecoder = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
-    ffmpegDecoder = new ffmpeg_decoder();
+    videoDecoder = new video_decoder();
+    audioDecoder = new audio_decoder();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url) {
     const char *path = env->GetStringUTFChars(url, nullptr);
-    if (ffmpegDecoder != nullptr) {
-        ffmpegDecoder->decode(path, glLooper);
+    if (videoDecoder != nullptr) {
+        videoDecoder->decode(path, glLooper);
+        audioDecoder->decode(path);
     }
     env->ReleaseStringUTFChars(url, path);
 }
@@ -79,8 +83,10 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerPause(JNIEnv *env, jobjec
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobject instance) {
-    delete ffmpegDecoder;
-    ffmpegDecoder = nullptr;
+    delete videoDecoder;
+    videoDecoder = nullptr;
+    delete audioDecoder;
+    audioDecoder = nullptr;
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(

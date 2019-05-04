@@ -8,12 +8,12 @@
 #include <string>
 #include "../render/gl_looper.h"
 
-class ffmpeg_decoder {
+class video_decoder {
 
 public:
-    ffmpeg_decoder();
+    video_decoder();
 
-    virtual ~ffmpeg_decoder();
+    virtual ~video_decoder();
 
     void decode(const char *url, gl_looper *looper);
 
