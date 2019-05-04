@@ -104,13 +104,11 @@ void *ffmpeg_decoder::trampoline(void *p) {
             }
 //            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
 //                      pFrame->data, pFrame->linesize);
-            __android_log_print(ANDROID_LOG_DEBUG, "123", ", %d: %d", static_cast<int>(pFrame->pts), pFrame->height);
             looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
-
             av_packet_unref(packet);
         }
-
     }
+    avcodec_free_context(&codecContext);
+    avformat_free_context(formatContext);
     return nullptr;
-
 }
