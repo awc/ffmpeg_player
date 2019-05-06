@@ -6,7 +6,6 @@ class NativePlayer {
         nativePlayerInit()
     }
 
-
     fun setDataSource(url: String) {
         nativePlayerSetDataSource(url)
     }

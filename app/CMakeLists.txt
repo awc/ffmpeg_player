@@ -86,4 +86,12 @@ target_link_libraries(native-lib
         avutil swresample swscale avcodec avformat avfilter avdevice x264
         ${log-lib} ${android-lib}
         android EGL GLESv3 jnigraphics
+        oboe
         )
+
+# Build the Oboe library
+set(OBOE_DIR ../../../ndk/oboe)
+add_subdirectory(${OBOE_DIR} ./oboe)
+
+# Make the Oboe public headers available to our app
+include_directories(${OBOE_DIR}/include)
