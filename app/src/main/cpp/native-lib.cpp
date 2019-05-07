@@ -14,13 +14,15 @@ extern "C" {
 #include "render/gl_looper.h"
 #include "decoder/video_decoder.h"
 #include "decoder/audio_decoder.h"
+#include "decoder/circle_av_frame_queue.h"
 
 static JavaVM *g_vm;
-
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_ffmpegplayer_MainActivity_stringFromJNI(JNIEnv *env, jobject instance) {
     return env->NewStringUTF(avcodec_configuration());
 }
+
+//surface
 
 gl_looper *glLooper = nullptr;
 ANativeWindow *nativeWindow = nullptr;
@@ -53,19 +55,34 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, job
     }
 }
 
+//player
+
 video_decoder *videoDecoder = nullptr;
 audio_decoder *audioDecoder = nullptr;
+circle_av_frame_queue *video_queue = nullptr;
+circle_av_frame_queue *audio_queue = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
     videoDecoder = new video_decoder();
     audioDecoder = new audio_decoder();
+
+    video_queue = new circle_av_frame_queue();
+    audio_queue = new circle_av_frame_queue();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeNanos) {
+    AVFrame *frame = video_queue->pull();
+    if (frame != nullptr) {
+        glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url) {
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
-        videoDecoder->decode(path, glLooper);
+        videoDecoder->decode(path, glLooper, video_queue);
         audioDecoder->decode(path);
     }
     env->ReleaseStringUTFChars(url, path);
@@ -87,6 +104,10 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobj
     videoDecoder = nullptr;
     delete audioDecoder;
     audioDecoder = nullptr;
+    delete video_queue;
+    video_queue = nullptr;
+    delete audio_queue;
+    audio_queue = nullptr;
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(

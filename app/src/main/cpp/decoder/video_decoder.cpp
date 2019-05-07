@@ -21,9 +21,10 @@ video_decoder::~video_decoder() {
 
 }
 
-void video_decoder::decode(const char *url, gl_looper *looper) {
+void video_decoder::decode(const char *url, gl_looper *loope, circle_av_frame_queue *video_queue) {
     this->url = url;
     this->looper = looper;
+    this->video_queue = video_queue;
     //decode thread
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -33,6 +34,7 @@ void video_decoder::decode(const char *url, gl_looper *looper) {
 void *video_decoder::trampoline(void *p) {
     const char *url = ((video_decoder *) p)->url;
     gl_looper *looper = ((video_decoder *) p)->looper;
+    circle_av_frame_queue *video_queue = ((video_decoder *) p)->video_queue;
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
@@ -104,7 +106,9 @@ void *video_decoder::trampoline(void *p) {
             }
 //            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
 //                      pFrame->data, pFrame->linesize);
-            looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
+//            looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
+            video_queue->push(pFrame);
+            __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
             av_packet_unref(packet);
         }
     }

@@ -7,6 +7,7 @@
 
 #include <string>
 #include "../render/gl_looper.h"
+#include "circle_av_frame_queue.h"
 
 class video_decoder {
 
@@ -15,7 +16,7 @@ public:
 
     virtual ~video_decoder();
 
-    void decode(const char *url, gl_looper *looper);
+    void decode(const char *url, gl_looper *looper, circle_av_frame_queue *video_queue);
 
 private:
 
@@ -26,6 +27,8 @@ private:
     const char *url;
 
     gl_looper *looper;
+
+    circle_av_frame_queue *video_queue;
 };
 
 #endif //FFMPEG_PLAYER_FFMPEG_DECODER_H

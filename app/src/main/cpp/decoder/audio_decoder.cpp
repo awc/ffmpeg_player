@@ -106,7 +106,7 @@ void *audio_decoder::trampoline(void *p) {
             }
             swr_convert(swrContext, &out_buffer, MAX_AUDIO_FRAME_SIZE, (const uint8_t **)pFrame->data, pFrame->nb_samples);
 //            fwrite(out_buffer, 1, out_buffer_size, pFile);
-            __android_log_print(ANDROID_LOG_DEBUG, "audio", " %lld, %d", pFrame->pts, packet->size);
+//            __android_log_print(ANDROID_LOG_DEBUG, "audio", " %lld, %d", pFrame->pts, packet->size);
         }
     }
     av_packet_free(&packet);

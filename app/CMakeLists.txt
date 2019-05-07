@@ -20,6 +20,9 @@ add_library(native-lib
 
         src/main/cpp/decoder/video_decoder.cpp
         src/main/cpp/decoder/audio_decoder.cpp
+        src/main/cpp/decoder/circle_av_frame_queue.cpp
+
+        src/main/cpp/synchronize/video_audiio_synchronizer.cpp
         )
 
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/src/main/jniLibs)
