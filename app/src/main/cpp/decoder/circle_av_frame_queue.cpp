@@ -61,12 +61,11 @@ circle_av_frame_queue::~circle_av_frame_queue() {
 
 void circle_av_frame_queue::push(AVFrame *avFrame) {
     pthread_mutex_lock(&mLock);
-    if (pushCursor->next != pullCursor) {
-        pushCursor->frame = avFrame;
-        pushCursor = pushCursor->next;
-    } else {
+    if (pushCursor->next == pullCursor) {
         pthread_cond_wait(&mCondition, &mLock);
     }
+    pushCursor->frame = avFrame;
+    pushCursor = pushCursor->next;
     pthread_mutex_unlock(&mLock);
 }
 
