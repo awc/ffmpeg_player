@@ -36,7 +36,7 @@ void base_filter::init_program() {
 
     yTexture = createTexture(GL_TEXTURE_2D);
     uTexture = createTexture(GL_TEXTURE_2D);
-    uTexture = createTexture(GL_TEXTURE_2D);
+    vTexture = createTexture(GL_TEXTURE_2D);
 }
 
 void base_filter::drawFrame(AVFrame *avFrame) {
