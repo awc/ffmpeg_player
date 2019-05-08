@@ -6,6 +6,7 @@
 #include <string>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <android/log.h>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -15,6 +16,7 @@ extern "C" {
 #include "decoder/video_decoder.h"
 #include "decoder/audio_decoder.h"
 #include "decoder/circle_av_frame_queue.h"
+#include "synchronize/video_audiio_synchronizer.h"
 
 static JavaVM *g_vm;
 extern "C" JNIEXPORT jstring JNICALL
@@ -61,6 +63,7 @@ video_decoder *videoDecoder = nullptr;
 audio_decoder *audioDecoder = nullptr;
 circle_av_frame_queue *video_queue = nullptr;
 circle_av_frame_queue *audio_queue = nullptr;
+video_audio_synchronizer *synchronizer = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
     videoDecoder = new video_decoder();
@@ -68,14 +71,25 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject
 
     video_queue = new circle_av_frame_queue();
     audio_queue = new circle_av_frame_queue();
+
+    synchronizer = new video_audio_synchronizer();
 }
 
+int64_t start_time = 0;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeNanos) {
-    AVFrame *frame = video_queue->pull();
-    if (frame != nullptr) {
-        glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
+Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeMillis) {
+    int64_t pts = video_queue->pullAVFramePts();
+    if (pts == 0) {
+        start_time = frameTimeMillis;
     }
+    if (synchronizer->syncVideo(pts, frameTimeMillis - start_time)) {
+        AVFrame *frame = video_queue->pull();
+        if (frame != nullptr) {
+            __android_log_print(ANDROID_LOG_DEBUG, "doFrameSuccess", " %lld, %lld", pts, frameTimeMillis - start_time);
+            glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
+        }
+    }
+    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -108,6 +122,8 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobj
     video_queue = nullptr;
     delete audio_queue;
     audio_queue = nullptr;
+    delete synchronizer;
+    synchronizer = nullptr;
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(

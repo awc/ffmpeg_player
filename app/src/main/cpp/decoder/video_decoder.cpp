@@ -81,6 +81,7 @@ void *video_decoder::trampoline(void *p) {
 //                                                codecContext->width, codecContext->height, AV_PIX_FMT_YUV420P,
 //                                                SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
+    double ratio = av_q2d(formatContext->streams[video_stream_index]->time_base) * 1000;
     int ret;
     while (codecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
         if (av_read_frame(formatContext, packet) < 0) {
@@ -107,6 +108,11 @@ void *video_decoder::trampoline(void *p) {
 //            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
 //                      pFrame->data, pFrame->linesize);
 //            looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
+            if (pFrame->pts == AV_NOPTS_VALUE) {
+                pFrame->pts = static_cast<int64_t>(pFrame->best_effort_timestamp * ratio);
+            } else {
+                pFrame->pts = static_cast<int64_t>(pFrame->pts * ratio);
+            }
             video_queue->push(pFrame);
             __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
             av_packet_unref(packet);

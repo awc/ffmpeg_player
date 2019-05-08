@@ -29,6 +29,8 @@ public:
 
     AVFrame *pull();
 
+    int64_t pullAVFramePts();
+
 private:
 
     pthread_mutex_t mLock;

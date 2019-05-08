@@ -17,11 +17,9 @@ public:
 
     virtual ~video_audio_synchronizer();
 
-private:
+    bool syncVideo(int64_t pts, int64_t currentTimeMillis);
 
-    bool syncVideo(long pts, long currentTimeMillis);
-
-    bool syncAudio(long pts, long currentTimeMillis);
+    bool syncAudio(int64_t pts, int64_t currentTimeMillis);
 
 };
 

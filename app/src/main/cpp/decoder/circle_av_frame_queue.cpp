@@ -80,4 +80,11 @@ AVFrame *circle_av_frame_queue::pull() {
     }
 }
 
+int64_t circle_av_frame_queue::pullAVFramePts() {
+    if (pullCursor->frame != nullptr) {
+        return pullCursor->frame->pts;
+    }
+    return -1;
+}
+
 
