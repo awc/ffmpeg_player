@@ -114,7 +114,7 @@ void *video_decoder::trampoline(void *p) {
                 pFrame->pts = static_cast<int64_t>(pFrame->pts * ratio);
             }
             video_queue->push(pFrame);
-            __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
+//            __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
             av_packet_unref(packet);
         }
     }

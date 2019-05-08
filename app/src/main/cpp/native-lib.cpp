@@ -85,11 +85,11 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
     if (synchronizer->syncVideo(pts, frameTimeMillis - start_time)) {
         AVFrame *frame = video_queue->pull();
         if (frame != nullptr) {
-            __android_log_print(ANDROID_LOG_DEBUG, "doFrameSuccess", " %lld, %lld", pts, frameTimeMillis - start_time);
+//            __android_log_print(ANDROID_LOG_DEBUG, "doFrameSuccess", " %lld, %lld", pts, frameTimeMillis - start_time);
             glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
         }
     }
-    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
+//    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
 }
 
 extern "C" JNIEXPORT void JNICALL
