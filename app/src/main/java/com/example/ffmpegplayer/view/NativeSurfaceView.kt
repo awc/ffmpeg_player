@@ -1,14 +1,11 @@
-package com.example.ffmpegplayer
+package com.example.ffmpegplayer.view
 
 import android.content.Context
-import android.os.Environment
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Choreographer
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import java.io.File
 
 class NativeSurfaceView : SurfaceView, SurfaceHolder.Callback, Choreographer.FrameCallback {
 

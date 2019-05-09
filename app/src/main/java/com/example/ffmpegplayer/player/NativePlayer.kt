@@ -1,4 +1,4 @@
-package com.example.ffmpegplayer
+package com.example.ffmpegplayer.player
 
 import android.os.Handler
 import android.os.Looper

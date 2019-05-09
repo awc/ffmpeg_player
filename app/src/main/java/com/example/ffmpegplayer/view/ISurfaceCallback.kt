@@ -1,4 +1,4 @@
-package com.example.ffmpegplayer
+package com.example.ffmpegplayer.view
 
 import android.view.Surface
 

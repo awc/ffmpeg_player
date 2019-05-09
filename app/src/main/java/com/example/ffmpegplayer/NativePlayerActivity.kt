@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
+import com.example.ffmpegplayer.player.IVideoListener
+import com.example.ffmpegplayer.player.NativePlayer
+import com.example.ffmpegplayer.view.ISurfaceCallback
 import kotlinx.android.synthetic.main.activity_native_player.*
 import java.io.File
 
