@@ -1,5 +1,9 @@
 package com.example.ffmpegplayer
 
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+
 class NativePlayer {
 
     init {
@@ -7,7 +11,7 @@ class NativePlayer {
     }
 
     fun setDataSource(url: String) {
-        nativePlayerSetDataSource(url)
+        nativePlayerSetDataSource(url, this)
     }
 
     fun start() {
@@ -23,13 +27,21 @@ class NativePlayer {
     }
 
     var videoListener: IVideoListener? = null
+    var mainHandler = Handler(Looper.getMainLooper())
 
     fun videoSizeChanged(width: Int, height: Int) {
-        videoListener?.onVideoSizeChanged(width, height)
+        Log.d(TAG, "width=$width, height=$height")
+        mainHandler.post {
+            videoListener?.onVideoSizeChanged(width, height)
+        }
+    }
+
+    companion object {
+        const val TAG = "NativePlayer"
     }
 
     private external fun nativePlayerInit()
-    private external fun nativePlayerSetDataSource(url: String)
+    private external fun nativePlayerSetDataSource(url: String, player: NativePlayer)
     private external fun nativePlayerStart()
     private external fun nativePlayerPause()
     private external fun nativePlayerRelease()

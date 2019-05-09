@@ -21,9 +21,10 @@ video_decoder::~video_decoder() {
 
 }
 
-void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue) {
+void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue, jobject javaPlayerRef) {
     this->url = url;
     this->video_queue = video_queue;
+    this->javaPlayer = javaPlayerRef;
     //decode thread
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -31,7 +32,13 @@ void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue) 
 }
 
 void *video_decoder::trampoline(void *p) {
+    JavaVM *vm = ((video_decoder *) p)->vm;
     const char *url = ((video_decoder *) p)->url;
+    JNIEnv *jniEnv = ((video_decoder *) p)->env;
+    if (vm != nullptr) {
+        vm->AttachCurrentThread(&jniEnv, nullptr);
+    }
+    jobject javaPlayer = ((video_decoder *) p)->javaPlayer;
     circle_av_frame_queue *video_queue = ((video_decoder *) p)->video_queue;
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
@@ -63,6 +70,12 @@ void *video_decoder::trampoline(void *p) {
     if (avcodec_open2(codecContext, videoCodec, nullptr) < 0) {
         ALOGD("can not open video decoder")
         return nullptr;
+    }
+    //视频大小回调
+    if (jniEnv != nullptr && javaPlayer != nullptr) {
+        jclass clazz = jniEnv->GetObjectClass(javaPlayer);
+        jmethodID methodId = jniEnv->GetMethodID(clazz, "videoSizeChanged", "(II)V");
+        jniEnv->CallVoidMethod(javaPlayer, methodId, codecContext->width, codecContext->height);
     }
     //循环从文件读取一帧压缩数据
     int size = codecContext->width * codecContext->height;
@@ -118,5 +131,9 @@ void *video_decoder::trampoline(void *p) {
     av_packet_free(&packet);
     avcodec_close(codecContext);
     avformat_close_input(&formatContext);
+
+    if (vm != nullptr) {
+        vm->DetachCurrentThread();
+    }
     return nullptr;
 }

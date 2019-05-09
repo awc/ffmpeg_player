@@ -16,7 +16,7 @@ class NativeSurfaceView : SurfaceView, SurfaceHolder.Callback, Choreographer.Fra
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private lateinit var nativePlayer: NativePlayer
+    var surfaceCallback: ISurfaceCallback? = null
 
     init {
         holder.addCallback(this)
@@ -25,10 +25,7 @@ class NativeSurfaceView : SurfaceView, SurfaceHolder.Callback, Choreographer.Fra
     override fun surfaceCreated(holder: SurfaceHolder?) {
         if (holder != null) {
             nativeSurfaceCreated(holder.surface)
-            nativePlayer = NativePlayer()
-            val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
-            nativePlayer.setDataSource(path)
-            nativePlayer.start()
+            surfaceCallback?.surfaceCreated(holder.surface)
             Choreographer.getInstance().postFrameCallback(this)
         }
     }
@@ -36,13 +33,13 @@ class NativeSurfaceView : SurfaceView, SurfaceHolder.Callback, Choreographer.Fra
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         if (holder != null) {
             nativeSurfaceChanged(width, height)
+            surfaceCallback?.surfaceChanged(width, height)
         }
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         if (holder != null) {
-            nativePlayer.pause()
-            nativePlayer.release()
+            surfaceCallback?.surfaceDestroyed()
             nativeDestroyed()
             Choreographer.getInstance().removeFrameCallback(this)
         }

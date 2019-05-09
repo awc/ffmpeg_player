@@ -6,6 +6,7 @@
 #define FFMPEG_PLAYER_FFMPEG_DECODER_H
 
 #include <string>
+#include <jni.h>
 #include "../render/gl_looper.h"
 #include "circle_av_frame_queue.h"
 
@@ -16,7 +17,9 @@ public:
 
     virtual ~video_decoder();
 
-    void decode(const char *url, circle_av_frame_queue *video_queue);
+    void decode(const char *url, circle_av_frame_queue *video_queue, jobject javaPlayerRef);
+
+    JavaVM *vm = nullptr;
 
 private:
 
@@ -25,8 +28,12 @@ private:
     static void *trampoline(void *p);
 
     const char *url;
-    
+
     circle_av_frame_queue *video_queue;
+
+    JNIEnv *env = nullptr;
+
+    jobject javaPlayer;
 };
 
 #endif //FFMPEG_PLAYER_FFMPEG_DECODER_H

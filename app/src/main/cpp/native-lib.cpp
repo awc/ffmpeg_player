@@ -67,6 +67,7 @@ video_audio_synchronizer *synchronizer = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
     videoDecoder = new video_decoder();
+    videoDecoder->vm = g_vm;
     audioDecoder = new audio_decoder();
 
     video_queue = new circle_av_frame_queue();
@@ -92,11 +93,13 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
 //    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
 }
 
+jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url) {
+Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url, jobject javaPlayer) {
+    javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
-        videoDecoder->decode(path, video_queue);
+        videoDecoder->decode(path, video_queue, javaPlayerRef);
         audioDecoder->decode(path);
     }
     env->ReleaseStringUTFChars(url, path);
@@ -124,6 +127,11 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobj
     audio_queue = nullptr;
     delete synchronizer;
     synchronizer = nullptr;
+
+    if (javaPlayerRef != nullptr) {
+        env->DeleteGlobalRef(javaPlayerRef);
+        javaPlayerRef = nullptr;
+    }
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(
