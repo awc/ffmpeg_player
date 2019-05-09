@@ -16,7 +16,7 @@ public:
 
     virtual ~video_decoder();
 
-    void decode(const char *url, gl_looper *looper, circle_av_frame_queue *video_queue);
+    void decode(const char *url, circle_av_frame_queue *video_queue);
 
 private:
 
@@ -25,9 +25,7 @@ private:
     static void *trampoline(void *p);
 
     const char *url;
-
-    gl_looper *looper;
-
+    
     circle_av_frame_queue *video_queue;
 };
 

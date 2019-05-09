@@ -48,8 +48,8 @@ class NativeSurfaceView : SurfaceView, SurfaceHolder.Callback, Choreographer.Fra
         }
     }
 
-    var firstDoFrame = true
-    var startTime = 0L
+    private var firstDoFrame = true
+    private var startTime = 0L
     override fun doFrame(frameTimeNanos: Long) {
         if (firstDoFrame) {
             startTime = frameTimeNanos

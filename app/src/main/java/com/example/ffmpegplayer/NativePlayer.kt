@@ -22,6 +22,12 @@ class NativePlayer {
         nativePlayerRelease()
     }
 
+    var videoListener: IVideoListener? = null
+
+    fun videoSizeChanged(width: Int, height: Int) {
+        videoListener?.onVideoSizeChanged(width, height)
+    }
+
     private external fun nativePlayerInit()
     private external fun nativePlayerSetDataSource(url: String)
     private external fun nativePlayerStart()

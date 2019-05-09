@@ -21,9 +21,8 @@ video_decoder::~video_decoder() {
 
 }
 
-void video_decoder::decode(const char *url, gl_looper *loope, circle_av_frame_queue *video_queue) {
+void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue) {
     this->url = url;
-    this->looper = looper;
     this->video_queue = video_queue;
     //decode thread
     pthread_attr_t attr;
@@ -33,7 +32,6 @@ void video_decoder::decode(const char *url, gl_looper *loope, circle_av_frame_qu
 
 void *video_decoder::trampoline(void *p) {
     const char *url = ((video_decoder *) p)->url;
-    gl_looper *looper = ((video_decoder *) p)->looper;
     circle_av_frame_queue *video_queue = ((video_decoder *) p)->video_queue;
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
@@ -107,7 +105,6 @@ void *video_decoder::trampoline(void *p) {
             }
 //            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
 //                      pFrame->data, pFrame->linesize);
-//            looper->postMessage(looper->kMsgSurfaceDoFrame, pFrame);
             if (pFrame->pts == AV_NOPTS_VALUE) {
                 pFrame->pts = static_cast<int64_t>(pFrame->best_effort_timestamp * ratio);
             } else {

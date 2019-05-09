@@ -96,7 +96,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url) {
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
-        videoDecoder->decode(path, glLooper, video_queue);
+        videoDecoder->decode(path, video_queue);
         audioDecoder->decode(path);
     }
     env->ReleaseStringUTFChars(url, path);

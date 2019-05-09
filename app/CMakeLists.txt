@@ -22,6 +22,8 @@ add_library(native-lib
         src/main/cpp/decoder/audio_decoder.cpp
         src/main/cpp/decoder/circle_av_frame_queue.cpp
 
+        src/main/cpp/audio/audio_player.cpp
+
         src/main/cpp/synchronize/video_audiio_synchronizer.cpp
         )
 
@@ -88,7 +90,7 @@ include_directories(${JNI_LIBS_DIR}/includes)
 target_link_libraries(native-lib
         avutil swresample swscale avcodec avformat avfilter avdevice x264
         ${log-lib} ${android-lib}
-        android EGL GLESv3 jnigraphics
+        android EGL GLESv3 jnigraphics OpenSLES
         oboe
         )
 
