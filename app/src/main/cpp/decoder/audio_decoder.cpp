@@ -21,8 +21,9 @@ audio_decoder::~audio_decoder() {
 
 }
 
-void audio_decoder::decode(const char *url) {
+void audio_decoder::decode(const char *url, circle_av_frame_queue *video_queue) {
     this->url = url;
+    this->audio_queue = video_queue;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_create(&worker_thread, &attr, trampoline, this);
@@ -30,6 +31,7 @@ void audio_decoder::decode(const char *url) {
 
 void *audio_decoder::trampoline(void *p) {
     const char *url = ((audio_decoder *) p)->url;
+    circle_av_frame_queue *audio_queue = ((audio_decoder *) p)->audio_queue;
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
@@ -107,6 +109,8 @@ void *audio_decoder::trampoline(void *p) {
             swr_convert(swrContext, &out_buffer, MAX_AUDIO_FRAME_SIZE, (const uint8_t **)pFrame->data, pFrame->nb_samples);
 //            fwrite(out_buffer, 1, out_buffer_size, pFile);
 //            __android_log_print(ANDROID_LOG_DEBUG, "audio", " %lld, %d", pFrame->pts, packet->size);
+            audio_queue->push(pFrame);
+            av_packet_unref(packet);
         }
     }
     av_packet_free(&packet);

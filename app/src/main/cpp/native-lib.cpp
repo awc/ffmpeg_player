@@ -17,6 +17,7 @@ extern "C" {
 #include "decoder/audio_decoder.h"
 #include "decoder/circle_av_frame_queue.h"
 #include "synchronize/video_audiio_synchronizer.h"
+#include "audio/audio_looper.h"
 
 static JavaVM *g_vm;
 extern "C" JNIEXPORT jstring JNICALL
@@ -27,6 +28,7 @@ Java_com_example_ffmpegplayer_MainActivity_stringFromJNI(JNIEnv *env, jobject in
 //surface
 
 gl_looper *glLooper = nullptr;
+audio_looper *audioLooper = nullptr;
 ANativeWindow *nativeWindow = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceCreated(JNIEnv *env, jobject instance, jobject surface) {
@@ -50,6 +52,12 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, job
         glLooper->quit();
         delete glLooper;
         glLooper = nullptr;
+    }
+    if (audioLooper != nullptr) {
+        audioLooper->postMessage(audioLooper->kMsgAudioPlayerDestroyed);
+        audioLooper->quit();
+        delete audioLooper;
+        audioLooper = nullptr;
     }
     if (nativeWindow != nullptr) {
         ANativeWindow_release(nativeWindow);
@@ -95,12 +103,13 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
 
 jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url, jobject javaPlayer) {
+Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url,
+                                                                     jobject javaPlayer) {
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
         videoDecoder->decode(path, video_queue, javaPlayerRef);
-        audioDecoder->decode(path);
+        audioDecoder->decode(path, audio_queue);
     }
     env->ReleaseStringUTFChars(url, path);
 }
@@ -132,6 +141,14 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobj
         env->DeleteGlobalRef(javaPlayerRef);
         javaPlayerRef = nullptr;
     }
+}
+
+//audio
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_ffmpegplayer_NativePlayer_nativeAudioInit(JNIEnv *env, jobject instance, jint defaultSampleRate,
+                                                           jint defaultFramesPerBurst) {
+    audioLooper = new audio_looper(audio_queue);
+    audioLooper->postMessage(audioLooper->kMsgAudioPlayerCreated, defaultSampleRate, defaultFramesPerBurst, audio_queue);
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(

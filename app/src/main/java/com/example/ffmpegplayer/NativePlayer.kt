@@ -1,13 +1,25 @@
-package com.example.ffmpegplayer.player
+package com.example.ffmpegplayer
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.media.AudioManager
+import android.os.Build
 
-class NativePlayer {
+
+class NativePlayer(private val context: Context) {
 
     init {
         nativePlayerInit()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val myAudioMgr = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val sampleRateStr = myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)
+            val defaultSampleRate = Integer.parseInt(sampleRateStr)
+            val framesPerBurstStr = myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
+            val defaultFramesPerBurst = Integer.parseInt(framesPerBurstStr)
+            nativeAudioInit(defaultSampleRate, defaultFramesPerBurst)
+        }
     }
 
     fun setDataSource(url: String) {
@@ -41,6 +53,7 @@ class NativePlayer {
     }
 
     private external fun nativePlayerInit()
+    private external fun nativeAudioInit(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     private external fun nativePlayerSetDataSource(url: String, player: NativePlayer)
     private external fun nativePlayerStart()
     private external fun nativePlayerPause()

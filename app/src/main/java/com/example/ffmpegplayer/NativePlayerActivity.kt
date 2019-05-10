@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
-import com.example.ffmpegplayer.player.IVideoListener
-import com.example.ffmpegplayer.player.NativePlayer
-import com.example.ffmpegplayer.view.ISurfaceCallback
 import kotlinx.android.synthetic.main.activity_native_player.*
 import java.io.File
 
@@ -31,7 +28,7 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
     }
 
     override fun surfaceCreated(surface: Surface) {
-        nativePlayer = NativePlayer()
+        nativePlayer = NativePlayer(applicationContext)
         nativePlayer.videoListener = this
         val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
         nativePlayer.setDataSource(path)
@@ -42,4 +39,5 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
         nativePlayer.pause()
         nativePlayer.release()
     }
+
 }

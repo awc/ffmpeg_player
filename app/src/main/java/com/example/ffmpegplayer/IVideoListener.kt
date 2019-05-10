@@ -1,4 +1,4 @@
-package com.example.ffmpegplayer.player
+package com.example.ffmpegplayer
 
 interface IVideoListener {
 

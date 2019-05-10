@@ -1,4 +1,4 @@
-package com.example.ffmpegplayer.view
+package com.example.ffmpegplayer
 
 import android.content.Context
 import android.util.AttributeSet
