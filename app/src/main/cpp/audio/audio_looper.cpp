@@ -15,19 +15,26 @@ audio_looper::~audio_looper() {
 void audio_looper::handleMessage(looper::LooperMessage *msg) {
     switch (msg->what) {
         case kMsgAudioPlayerCreated: {
-            audioPlayer = new audio_player(msg->arg1, msg->arg2, 2, audioQueue);
+            openslesPlayer = new opensles_player(audioQueue);
+            openslesPlayer->createPlayer();
             break;
         }
         case kMsgAudioPlayerDestroyed: {
-            if (audioPlayer != nullptr) {
-                delete audioPlayer;
-                audioPlayer = nullptr;
+            if (openslesPlayer != nullptr) {
+                delete openslesPlayer;
+                openslesPlayer = nullptr;
             }
             break;
         }
         case kMsgAudioPlayerDoFrame: {
-            if (audioPlayer != nullptr) {
-                audioPlayer->addFrame(reinterpret_cast<AVFrame *>(msg->arg1));
+            if (openslesPlayer != nullptr) {
+                openslesPlayer->play();
+            }
+            break;
+        }
+        case kMsgSwrContextInit: {
+            if (openslesPlayer != nullptr) {
+                openslesPlayer->swrContext = static_cast<SwrContext *>(msg->obj);
             }
             break;
         }

@@ -20,6 +20,9 @@ bool video_audio_synchronizer::syncVideo(int64_t pts, int64_t currentTimeMillis)
 }
 
 bool video_audio_synchronizer::syncAudio(int64_t pts, int64_t currentTimeMillis) {
+    if (pts <= currentTimeMillis) {
+        return true;
+    }
     return false;
 }
 

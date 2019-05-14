@@ -6,8 +6,8 @@
 #define FFMPEG_PLAYER_AUDIO_LOOPER_H
 
 #include "../render/looper.h"
-#include "audio_player.h"
 #include "../decoder/circle_av_frame_queue.h"
+#include "opensles_player.h"
 
 class audio_looper : public looper {
 
@@ -16,7 +16,8 @@ public:
     enum {
         kMsgAudioPlayerCreated,
         kMsgAudioPlayerDestroyed,
-        kMsgAudioPlayerDoFrame
+        kMsgAudioPlayerDoFrame,
+        kMsgSwrContextInit
     };
 
     audio_looper(circle_av_frame_queue *audioQueue);
@@ -27,9 +28,9 @@ public:
 
 private:
 
-    audio_player *audioPlayer = nullptr;
-
     circle_av_frame_queue *audioQueue;
+
+    opensles_player *openslesPlayer = nullptr;
 };
 
 #endif //FFMPEG_PLAYER_AUDIO_LOOPER_H

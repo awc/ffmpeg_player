@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include "circle_av_frame_queue.h"
+#include "../audio/audio_looper.h"
 
 class audio_decoder {
 
@@ -15,7 +16,7 @@ public:
 
     virtual ~audio_decoder();
 
-    void decode(const char *url, circle_av_frame_queue *video_queue);
+    void decode(const char *url, circle_av_frame_queue *video_queue, audio_looper *audioLooper);
 
 private:
     pthread_t worker_thread;
@@ -25,6 +26,8 @@ private:
     const char *url;
 
     circle_av_frame_queue *audio_queue;
+
+    audio_looper *audioLooper;
 };
 
 #endif //FFMPEG_PLAYER_AUDIO_DECODER_H

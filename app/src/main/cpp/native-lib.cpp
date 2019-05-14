@@ -98,6 +98,11 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
             glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
         }
     }
+
+    int64_t audio_pts = audio_queue->pullAVFramePts();
+    if (synchronizer->syncAudio(audio_pts, frameTimeMillis - start_time)) {
+        audioLooper->postMessage(audioLooper->kMsgAudioPlayerDoFrame);
+    }
 //    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
 }
 
@@ -109,7 +114,7 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
         videoDecoder->decode(path, video_queue, javaPlayerRef);
-        audioDecoder->decode(path, audio_queue);
+        audioDecoder->decode(path, audio_queue, audioLooper);
     }
     env->ReleaseStringUTFChars(url, path);
 }
