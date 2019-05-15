@@ -12,29 +12,50 @@ audio_looper::~audio_looper() {
 
 }
 
+#define USE_OBOE 0
+
 void audio_looper::handleMessage(looper::LooperMessage *msg) {
     switch (msg->what) {
         case kMsgAudioPlayerCreated: {
-            openslesPlayer = new opensles_player(audioQueue);
-            openslesPlayer->createPlayer();
+            if (USE_OBOE) {
+                oboePlayer = new audio_player(msg->arg1, msg->arg2, 2, static_cast<circle_av_frame_queue *>(msg->obj));
+            } else {
+                openslesPlayer = new opensles_player(audioQueue);
+                openslesPlayer->createPlayer();
+            }
             break;
         }
         case kMsgAudioPlayerDestroyed: {
-            if (openslesPlayer != nullptr) {
-                delete openslesPlayer;
-                openslesPlayer = nullptr;
+            if (USE_OBOE) {
+                if (oboePlayer != nullptr) {
+                    delete oboePlayer;
+                    oboePlayer = nullptr;
+                }
+            } else {
+                if (openslesPlayer != nullptr) {
+                    delete openslesPlayer;
+                    openslesPlayer = nullptr;
+                }
             }
             break;
         }
         case kMsgAudioPlayerDoFrame: {
-            if (openslesPlayer != nullptr) {
-                openslesPlayer->play();
+            if (USE_OBOE) {
+
+            } else {
+                if (openslesPlayer != nullptr) {
+                    openslesPlayer->play();
+                }
             }
             break;
         }
         case kMsgSwrContextInit: {
-            if (openslesPlayer != nullptr) {
-                openslesPlayer->swrContext = static_cast<SwrContext *>(msg->obj);
+            if (USE_OBOE) {
+
+            } else {
+                if (openslesPlayer != nullptr) {
+                    openslesPlayer->swrContext = static_cast<SwrContext *>(msg->obj);
+                }
             }
             break;
         }

@@ -24,6 +24,7 @@ add_library(native-lib
 
         src/main/cpp/audio/audio_looper.cpp
         src/main/cpp/audio/opensles_player.cpp
+        src/main/cpp/audio/audio_player.cpp
 
         src/main/cpp/synchronize/video_audiio_synchronizer.cpp
         )

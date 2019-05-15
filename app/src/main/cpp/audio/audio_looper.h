@@ -8,6 +8,7 @@
 #include "../render/looper.h"
 #include "../decoder/circle_av_frame_queue.h"
 #include "opensles_player.h"
+#include "audio_player.h"
 
 class audio_looper : public looper {
 
@@ -31,6 +32,8 @@ private:
     circle_av_frame_queue *audioQueue;
 
     opensles_player *openslesPlayer = nullptr;
+
+    audio_player *oboePlayer = nullptr;
 };
 
 #endif //FFMPEG_PLAYER_AUDIO_LOOPER_H

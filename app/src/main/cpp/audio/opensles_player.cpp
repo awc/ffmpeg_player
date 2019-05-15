@@ -16,7 +16,6 @@ opensles_player::~opensles_player() {
 void _playCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     auto player = (opensles_player *) context;
     auto swrContext = ((opensles_player *) context)->swrContext;
-//    auto frame = player->frame;
     auto queue = player->audioQueue;
     auto frame = queue->pull();
     if (frame != nullptr && swrContext != nullptr) {
