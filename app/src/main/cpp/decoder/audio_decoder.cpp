@@ -9,7 +9,7 @@
 extern "C" {
 #include "libswresample/swresample.h"
 #include "libavformat/avformat.h"
-
+#include "libavutil/opt.h"
 }
 #define MAX_AUDIO_FRAME_SIZE 192000
 
@@ -69,25 +69,24 @@ void *audio_decoder::trampoline(void *p) {
     AVPacket *packet = av_packet_alloc();
 
     //Out Audio Param
-    uint64_t out_channel_layout = AV_CH_LAYOUT_STEREO;
     //AAC:1024  MP3:1152
-    int out_nb_samples = codecContext->frame_size;
-    AVSampleFormat out_sample_fmt = AV_SAMPLE_FMT_S16;
-    int out_sample_rate = 44100;
-    int out_channels = av_get_channel_layout_nb_channels(out_channel_layout);
-    //Out Buffer Size
-    int out_buffer_size = av_samples_get_buffer_size(NULL, out_channels, out_nb_samples, out_sample_fmt, 1);
-    __android_log_print(ANDROID_LOG_DEBUG, "_playCallback", "%d", codecContext->frame_size);
-    uint8_t *out_buffer = (uint8_t *) av_malloc(MAX_AUDIO_FRAME_SIZE * 2);
 
-    //FIX:Some Codec's Context Information is missing
-    int64_t in_channel_layout = av_get_default_channel_layout(codecContext->channels);
-    SwrContext *swrContext = swr_alloc_set_opts(nullptr, out_channel_layout, out_sample_fmt, out_sample_rate,
-                                                in_channel_layout, codecContext->sample_fmt,
-                                                codecContext->sample_rate, 0,
-                                                nullptr);
+//    uint64_t out_channel_layout = AV_CH_LAYOUT_STEREO;
+//    AVSampleFormat out_sample_fmt = AV_SAMPLE_FMT_S16;
+//    int out_sample_rate = 44100;
+//    int64_t in_channel_layout = av_get_default_channel_layout(codecContext->channels);
+//    SwrContext *swrContext = swr_alloc_set_opts(nullptr, out_channel_layout, out_sample_fmt, out_sample_rate,
+//                                                in_channel_layout, codecContext->sample_fmt,
+//                                                codecContext->sample_rate, 0,
+//                                                nullptr);
+    SwrContext *swrContext = swr_alloc();
+    av_opt_set_channel_layout(swrContext, "in_channel_layout", av_get_default_channel_layout(codecContext->channels), 0);
+    av_opt_set_channel_layout(swrContext, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+    av_opt_set_int(swrContext, "in_sample_rate", codecContext->sample_rate, 0);
+    av_opt_set_int(swrContext, "out_sample_rate", 44100, 0);
+    av_opt_set_sample_fmt(swrContext, "in_sample_fmt", codecContext->sample_fmt, 0);
+    av_opt_set_sample_fmt(swrContext, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
     swr_init(swrContext);
-
     audioLooper->postMessage(audioLooper->kMsgSwrContextInit, swrContext);
 
     int ret = 0;
@@ -112,8 +111,6 @@ void *audio_decoder::trampoline(void *p) {
                 av_frame_unref(pFrame);
                 continue;
             }
-//            swr_convert(swrContext, &out_buffer, MAX_AUDIO_FRAME_SIZE, (const uint8_t **) pFrame->data,
-//                        pFrame->nb_samples);
             if (pFrame->pts == AV_NOPTS_VALUE) {
                 pFrame->pts = static_cast<int64_t>(pFrame->best_effort_timestamp * ratio);
             } else {
@@ -125,7 +122,6 @@ void *audio_decoder::trampoline(void *p) {
         }
     }
     av_packet_free(&packet);
-    av_free(out_buffer);
     avcodec_close(codecContext);
     avformat_close_input(&formatContext);
 

@@ -10,7 +10,23 @@
 
 
 opensles_player::~opensles_player() {
-
+    if (playItf)(*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
+    if (playerObject) {
+        (*playerObject)->Destroy(playerObject);
+        playerObject = 0;
+        bufferQueueItf = 0;
+    }
+    if (mixObject) {
+        (*mixObject)->Destroy(mixObject);
+        mixObject = 0;
+    }
+    if (engineObject) {
+        (*engineObject)->Destroy(engineObject);
+        engineItf = 0;
+    }
+    if (swrContext) {
+        swr_free(&swrContext);
+    }
 }
 
 void _playCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
