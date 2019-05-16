@@ -27,6 +27,9 @@ add_library(native-lib
         src/main/cpp/audio/audio_player.cpp
 
         src/main/cpp/synchronize/video_audiio_synchronizer.cpp
+
+        src/main/cpp/offscreen/off_screen_thread.cpp
+        src/main/cpp/encoder/video_encoder.cpp
         )
 
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/src/main/jniLibs)

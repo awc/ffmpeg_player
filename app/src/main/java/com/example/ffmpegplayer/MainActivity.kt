@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.ffmpegplayer.offScreen.OffScreenActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,23 +28,23 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 PERMISSION_CODE
             )
-        } else {
-//            startNativePlayerActivity()
         }
-        play.setOnClickListener { startNativePlayerActivity() }
+        playBtn.setOnClickListener {
+            val intent = Intent(this, NativePlayerActivity::class.java)
+            startActivity(intent)
+        }
+        compileBtn.setOnClickListener {
+            val intent = Intent(this, OffScreenActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            startNativePlayerActivity()
+            
         } else {
             Toast.makeText(this, "must need write external storage permission!", Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun startNativePlayerActivity() {
-        val intent = Intent(this, NativePlayerActivity::class.java)
-        startActivity(intent)
     }
 
     companion object {

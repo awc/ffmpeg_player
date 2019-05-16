@@ -18,6 +18,7 @@ extern "C" {
 #include "decoder/circle_av_frame_queue.h"
 #include "synchronize/video_audiio_synchronizer.h"
 #include "audio/audio_looper.h"
+#include "offscreen/off_screen_thread.h"
 
 static JavaVM *g_vm;
 extern "C" JNIEXPORT jstring JNICALL
@@ -168,7 +169,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativeAudioInit(JNIEnv *env, jobject instance, jint defaultSampleRate,
                                                            jint defaultFramesPerBurst) {
     audioLooper = new audio_looper(audio_queue);
-    audioLooper->postMessage(audioLooper->kMsgAudioPlayerCreated, defaultSampleRate, defaultFramesPerBurst, audio_queue);
+    audioLooper->postMessage(audioLooper->kMsgAudioPlayerCreated, defaultSampleRate, defaultFramesPerBurst,
+                             audio_queue);
 }
 
 extern "C" JNIEXPORT jint JNI_OnLoad(
@@ -183,3 +185,11 @@ void JNI_OnUnload(JavaVM *vm, void *reserved) {
     g_vm = nullptr;
 }
 
+//offScreen
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOffScreenTask(JNIEnv *env, jobject instance,
+                                                                               jstring path) {
+    const char* src = env->GetStringUTFChars(path, nullptr);
+    off_screen_thread *offScreenThread = new off_screen_thread(src, g_vm);
+    env->ReleaseStringUTFChars(path, src);
+}
