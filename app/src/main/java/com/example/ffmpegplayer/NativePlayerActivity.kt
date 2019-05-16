@@ -30,8 +30,8 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
     override fun surfaceCreated(surface: Surface) {
         nativePlayer = NativePlayer(applicationContext)
         nativePlayer.videoListener = this
-//        val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
-        val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "test.mp3")}"
+        val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
+//        val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "test.mp3")}"
         nativePlayer.setDataSource(path)
         nativePlayer.start()
     }
