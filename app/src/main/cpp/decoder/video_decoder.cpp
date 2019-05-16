@@ -81,16 +81,6 @@ void *video_decoder::trampoline(void *p) {
     int size = codecContext->width * codecContext->height;
     auto *packet = static_cast<AVPacket *>(malloc(sizeof(AVPacket)));
     av_new_packet(packet, size);
-//    AVFrame *yuvFrame = av_frame_alloc();
-    //缓冲区分配内存
-//    int numBytes=av_image_get_buffer_size(AV_PIX_FMT_YUV420P, codecContext->width, codecContext->height, 1);
-//    uint8_t * buffer=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
-//    av_image_fill_arrays(yuvFrame->data, yuvFrame->linesize, buffer, AV_PIX_FMT_YUV420P,
-//                         codecContext->width, codecContext->height, 1);
-//    //用于转码（缩放）的参数，转之前的宽高，转之后的宽高，格式等
-//    struct SwsContext *sws_ctx = sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
-//                                                codecContext->width, codecContext->height, AV_PIX_FMT_YUV420P,
-//                                                SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
     double ratio = av_q2d(formatContext->streams[video_stream_index]->time_base) * 1000;
     int ret;
@@ -116,8 +106,6 @@ void *video_decoder::trampoline(void *p) {
                 av_frame_unref(pFrame);
                 continue;
             }
-//            sws_scale(sws_ctx, (const uint8_t *const *) yuvFrame->data, yuvFrame->linesize, 0, codecContext->height,
-//                      pFrame->data, pFrame->linesize);
             if (pFrame->pts == AV_NOPTS_VALUE) {
                 pFrame->pts = static_cast<int64_t>(pFrame->best_effort_timestamp * ratio);
             } else {

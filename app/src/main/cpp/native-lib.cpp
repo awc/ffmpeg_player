@@ -85,6 +85,8 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject
 }
 
 int64_t start_time = 0;
+bool renderFirstFrame = false;
+jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeMillis) {
     int64_t pts = video_queue->pullAVFramePts();
@@ -96,17 +98,30 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
         if (frame != nullptr) {
 //            __android_log_print(ANDROID_LOG_DEBUG, "doFrameSuccess", " %lld, %lld", pts, frameTimeMillis - start_time);
             glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
+
+            if (!renderFirstFrame && javaPlayerRef != nullptr) {
+                jclass clazz = env->GetObjectClass(javaPlayerRef);
+                jmethodID methodId = env->GetMethodID(clazz, "onRenderFirstFrame", "()V");
+                env->CallVoidMethod(javaPlayerRef, methodId);
+                renderFirstFrame = true;
+            }
         }
     }
 
     int64_t audio_pts = audio_queue->pullAVFramePts();
     if (synchronizer->syncAudio(audio_pts, frameTimeMillis - start_time)) {
         audioLooper->postMessage(audioLooper->kMsgAudioPlayerDoFrame);
+
+        if (!renderFirstFrame && javaPlayerRef != nullptr) {
+            jclass clazz = env->GetObjectClass(javaPlayerRef);
+            jmethodID methodId = env->GetMethodID(clazz, "onRenderFirstFrame", "()V");
+            env->CallVoidMethod(javaPlayerRef, methodId);
+            renderFirstFrame = true;
+        }
     }
 //    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
 }
 
-jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url,
                                                                      jobject javaPlayer) {
@@ -167,3 +182,4 @@ extern "C" JNIEXPORT jint JNI_OnLoad(
 void JNI_OnUnload(JavaVM *vm, void *reserved) {
     g_vm = nullptr;
 }
+

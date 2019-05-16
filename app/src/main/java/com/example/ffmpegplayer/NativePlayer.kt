@@ -48,6 +48,11 @@ class NativePlayer(private val context: Context) {
         }
     }
 
+    val startTime = System.currentTimeMillis()
+    fun onRenderFirstFrame() {
+        Log.d(TAG, "onRenderFirstFrame: ${System.currentTimeMillis() - startTime}")
+    }
+
     companion object {
         const val TAG = "NativePlayer"
     }
