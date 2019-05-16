@@ -36,6 +36,10 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
         nativePlayer.start()
     }
 
+    override fun onRenderFirstFrame() {
+
+    }
+
     override fun surfaceDestroyed() {
         nativePlayer.pause()
         nativePlayer.release()

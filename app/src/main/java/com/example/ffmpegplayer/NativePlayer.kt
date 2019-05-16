@@ -39,7 +39,7 @@ class NativePlayer(private val context: Context) {
     }
 
     var videoListener: IVideoListener? = null
-    var mainHandler = Handler(Looper.getMainLooper())
+    private var mainHandler = Handler(Looper.getMainLooper())
 
     fun videoSizeChanged(width: Int, height: Int) {
         Log.d(TAG, "width=$width, height=$height")
@@ -48,9 +48,12 @@ class NativePlayer(private val context: Context) {
         }
     }
 
-    val startTime = System.currentTimeMillis()
+    private val startTime = System.currentTimeMillis()
     fun onRenderFirstFrame() {
         Log.d(TAG, "onRenderFirstFrame: ${System.currentTimeMillis() - startTime}")
+        mainHandler.post {
+            videoListener?.onRenderFirstFrame()
+        }
     }
 
     companion object {
