@@ -6,15 +6,17 @@
 #include "off_screen_thread.h"
 #include "../common/native_log.h"
 #include "../filter/base_filter.h"
+#include "../encoder/video_encoder.h"
 #include <GLES3/gl3.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
 }
 
-off_screen_thread::off_screen_thread(const char *path, JavaVM *vm) {
-    this->path = path;
+off_screen_thread::off_screen_thread(const char *sourcePath, const char *destPath, JavaVM *vm) {
+    this->path = sourcePath;
     this->vm = vm;
+    this->destPath = destPath;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_create(&worker_thread, &attr, trampoline, this);
@@ -27,6 +29,7 @@ off_screen_thread::~off_screen_thread() {
 void *off_screen_thread::trampoline(void *p) {
     JavaVM *vm = ((off_screen_thread *) p)->vm;
     const char *path = ((off_screen_thread *) p)->path;
+    const char *destPath = ((off_screen_thread *) p)->destPath;
     JNIEnv *jniEnv = nullptr;
     if (vm != nullptr) {
         vm->AttachCurrentThread(&jniEnv, nullptr);
@@ -35,12 +38,12 @@ void *off_screen_thread::trampoline(void *p) {
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, path, nullptr, nullptr) < 0) {
-        ALOGD("can not open ", path)
+//        ALOGD("can not open ", path)
         return nullptr;
     }
     //获取信息
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        ALOGD("can not find stream info", path)
+//        ALOGD("can not find stream info", path)
         return nullptr;
     }
     //获取视频流的索引位置
@@ -83,6 +86,10 @@ void *off_screen_thread::trampoline(void *p) {
 
     double ratio = av_q2d(formatContext->streams[video_stream_index]->time_base) * 1000;
     int ret;
+
+    //encoder
+    auto *encoder = new video_encoder(destPath, codecContext->width, codecContext->height);
+
     while (codecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
         if (av_read_frame(formatContext, packet) < 0) {
             ALOGD("read frame end")
@@ -111,11 +118,15 @@ void *off_screen_thread::trampoline(void *p) {
                 pFrame->pts = static_cast<int64_t>(pFrame->pts * ratio);
             }
             __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
+            auto pts = pFrame->pts;
             //gl
             glClearColor(0.0, 0.0, 0.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT);
             filter->drawFrame(pFrame);
             offScreenSurface->swapBuffer();
+
+            //encode one frame
+            encoder->encode_frame(pts);
 
             av_packet_unref(packet);
         }
@@ -130,6 +141,8 @@ void *off_screen_thread::trampoline(void *p) {
     delete offScreenSurface;
     eglCore->release();
     delete eglCore;
+
+    delete encoder;
 
     if (vm != nullptr) {
         vm->DetachCurrentThread();

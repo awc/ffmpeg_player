@@ -188,8 +188,11 @@ void JNI_OnUnload(JavaVM *vm, void *reserved) {
 //offScreen
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOffScreenTask(JNIEnv *env, jobject instance,
-                                                                               jstring path) {
-    const char* src = env->GetStringUTFChars(path, nullptr);
-    off_screen_thread *offScreenThread = new off_screen_thread(src, g_vm);
+                                                                               jstring path, jstring destPath) {
+    const char *src = env->GetStringUTFChars(path, nullptr);
+    const char *dest = env->GetStringUTFChars(destPath, nullptr);
+    __android_log_print(ANDROID_LOG_DEBUG, "video path ", ": %s, %s", src, dest);
+    off_screen_thread *offScreenThread = new off_screen_thread(src, dest, g_vm);
     env->ReleaseStringUTFChars(path, src);
+    env->ReleaseStringUTFChars(destPath, dest);
 }

@@ -15,7 +15,13 @@ class OffScreenActivity : AppCompatActivity() {
         offScreenBtn.setOnClickListener {
             val offScreenUtil = OffScreenUtil()
             val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
-            offScreenUtil.startOffScreenTask(path)
+            val destPath = "${File(Environment.getExternalStorageDirectory().absolutePath, "ffmpeg_test.h264")}"
+            val file = File(destPath)
+            if (file.exists()) {
+                file.delete()
+                file.createNewFile()
+            }
+            offScreenUtil.startOffScreenTask(path, destPath)
         }
     }
 

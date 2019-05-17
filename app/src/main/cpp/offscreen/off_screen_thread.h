@@ -13,13 +13,14 @@
 class off_screen_thread {
 
 public:
-    off_screen_thread(const char *path, JavaVM *vm);
+    off_screen_thread(const char *sourcePath, const char *destPath, JavaVM *vm);
 
     virtual ~off_screen_thread();
 
 private:
 
     const char *path;
+    const char *destPath;
 
     JavaVM *vm;
 
