@@ -30,11 +30,11 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
 //            return;
 //        }
         if (ret == AVERROR(EAGAIN)) {
-            ALOGD(" output is not available in the current state - user must try to send input");
+//            ALOGD(" output is not available in the current state - user must try to send input");
             return;
         }
         else if (ret == AVERROR_EOF) {
-            ALOGD(" the encoder has been fully flushed, and there will be no more output packets");
+//            ALOGD(" the encoder has been fully flushed, and there will be no more output packets");
             return;
         }
         else if (ret < 0) {

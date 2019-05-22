@@ -19,6 +19,7 @@ extern "C" {
 #include "synchronize/video_audiio_synchronizer.h"
 #include "audio/audio_looper.h"
 #include "offscreen/off_screen_thread.h"
+#include "offscreen/on_screen_thread.h"
 
 static JavaVM *g_vm;
 extern "C" JNIEXPORT jstring JNICALL
@@ -193,6 +194,18 @@ Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOffScreenTask(J
     const char *dest = env->GetStringUTFChars(destPath, nullptr);
     __android_log_print(ANDROID_LOG_DEBUG, "video path ", ": %s, %s", src, dest);
     off_screen_thread *offScreenThread = new off_screen_thread(src, dest, g_vm);
+    env->ReleaseStringUTFChars(path, src);
+    env->ReleaseStringUTFChars(destPath, dest);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOnScreenTask(JNIEnv *env, jobject instance,
+                                                                               jstring path, jstring destPath,jobject surface) {
+    const char *src = env->GetStringUTFChars(path, nullptr);
+    const char *dest = env->GetStringUTFChars(destPath, nullptr);
+    __android_log_print(ANDROID_LOG_DEBUG, "video path ", ": %s, %s", src, dest);
+    nativeWindow = ANativeWindow_fromSurface(env, surface);
+    on_screen_thread *offScreenThread = new on_screen_thread(src, dest, g_vm, nativeWindow);
     env->ReleaseStringUTFChars(path, src);
     env->ReleaseStringUTFChars(destPath, dest);
 }
