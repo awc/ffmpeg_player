@@ -92,7 +92,7 @@ void *on_screen_thread::trampoline(void *p) {
     int ret;
 
     //encoder
-    auto *encoder = new video_encoder(destPath, codecContext->width, codecContext->height);
+    auto *encoder = new video_encoder(destPath, codecContext->width, codecContext->height, codecContext->framerate);
 
     while (codecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
         if (av_read_frame(formatContext, packet) < 0) {

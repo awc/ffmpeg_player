@@ -16,7 +16,7 @@ class video_encoder {
 
 public:
 
-    video_encoder(const char *dest, int width, int height);
+    video_encoder(const char *dest, int width, int height, AVRational frameRate);
 
     virtual ~video_encoder();
 

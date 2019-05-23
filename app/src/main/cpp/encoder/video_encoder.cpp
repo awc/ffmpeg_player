@@ -47,7 +47,7 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
     }
 }
 
-video_encoder::video_encoder(const char *dest, int width, int height) {
+video_encoder::video_encoder(const char *dest, int width, int height, AVRational frameRate) {
 //    f = fopen(dest, "w+");
     f = fopen("/sdcard/ffmpeg_test.h264", "w+");
     if (f == nullptr) {
@@ -68,14 +68,13 @@ video_encoder::video_encoder(const char *dest, int width, int height) {
     codecContext->bit_rate = 4000000;
     codecContext->width = width;
     codecContext->height = height;
-    codecContext->time_base.num =1;
-    codecContext->time_base.den =30;
-//    codecContext->framerate = (AVRational) {25, 1};
+    codecContext->time_base = (AVRational){1, 30};
+    codecContext->framerate = frameRate;
     codecContext->gop_size = 250;
     codecContext->max_b_frames = 5;
     codecContext->pix_fmt = AV_PIX_FMT_YUV420P;
     if (codec->id == AV_CODEC_ID_H264) {
-        av_opt_set(codecContext->priv_data, "preset", "slow", 0);
+        av_opt_set(codecContext->priv_data, "preset", "veryslow", 0);
     }
     int ret = avcodec_open2(codecContext, codec, nullptr);
     if (ret < 0) {
@@ -83,10 +82,11 @@ video_encoder::video_encoder(const char *dest, int width, int height) {
         return;
     }
 
-    swsContext = sws_getContext(codecContext->width, codecContext->height, AV_PIX_FMT_RGB24, codecContext->width,
-                                codecContext->height, AV_PIX_FMT_YUV420P, SWS_POINT,
+    swsContext = sws_getContext(codecContext->width, codecContext->height, AV_PIX_FMT_RGBA, codecContext->width,
+                                codecContext->height, AV_PIX_FMT_YUV420P, SWS_FAST_BILINEAR,
                                 nullptr, nullptr, nullptr);
     ALOGD("video encoder init success")
+
 }
 
 video_encoder::~video_encoder() {
@@ -98,7 +98,7 @@ void video_encoder::encode_frame(int64_t pts) {
     frame->format = codecContext->pix_fmt;
     frame->width = codecContext->width;
     frame->height = codecContext->height;
-    int ret = av_frame_get_buffer(frame, 32);
+    int ret = av_frame_get_buffer(frame, 0);
     if (ret < 0) {
         ALOGD("can not allocate video frame data")
         return;
@@ -110,7 +110,7 @@ void video_encoder::encode_frame(int64_t pts) {
         return;
     }
 
-    GLubyte *pixels = static_cast<GLubyte *>(malloc(4 * codecContext->width * codecContext->height));
+    auto *pixels = static_cast<GLubyte *>(malloc(4 * codecContext->width * codecContext->height));
     glReadPixels(0, 0, codecContext->width, codecContext->height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     if (pixels == nullptr) {
         __android_log_print(ANDROID_LOG_DEBUG, "video", "pixels is nullptr");
