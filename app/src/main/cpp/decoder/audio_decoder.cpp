@@ -31,6 +31,7 @@ void audio_decoder::decode(const char *url, circle_av_frame_queue *video_queue, 
 }
 
 void *audio_decoder::trampoline(void *p) {
+    avformat_network_init();
     const char *url = ((audio_decoder *) p)->url;
     circle_av_frame_queue *audio_queue = ((audio_decoder *) p)->audio_queue;
     audio_looper *audioLooper = ((audio_decoder *) p)->audioLooper;

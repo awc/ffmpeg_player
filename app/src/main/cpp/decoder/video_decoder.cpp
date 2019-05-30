@@ -32,6 +32,7 @@ void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue, 
 }
 
 void *video_decoder::trampoline(void *p) {
+    avformat_network_init();
     JavaVM *vm = ((video_decoder *) p)->vm;
     const char *url = ((video_decoder *) p)->url;
     JNIEnv *jniEnv = ((video_decoder *) p)->env;
@@ -43,7 +44,7 @@ void *video_decoder::trampoline(void *p) {
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
-        ALOGD("can not open ", url)
+        ALOGD("can not open", url)
         return nullptr;
     }
     //获取信息

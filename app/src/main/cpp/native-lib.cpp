@@ -133,7 +133,8 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
         videoDecoder->decode(path, video_queue, javaPlayerRef);
         audioDecoder->decode(path, audio_queue, audioLooper);
     }
-    env->ReleaseStringUTFChars(url, path);
+    //todo
+//    env->ReleaseStringUTFChars(url, path);
 }
 
 extern "C" JNIEXPORT void JNICALL
