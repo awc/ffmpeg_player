@@ -79,8 +79,8 @@ void *video_decoder::trampoline(void *p) {
     }
     //循环从文件读取一帧压缩数据
     int size = codecContext->width * codecContext->height;
-    auto *packet = static_cast<AVPacket *>(malloc(sizeof(AVPacket)));
-    av_new_packet(packet, size);
+    auto *packet = av_packet_alloc();
+//    av_new_packet(packet, size);
 
     double ratio = av_q2d(formatContext->streams[video_stream_index]->time_base) * 1000;
     int ret;
@@ -114,7 +114,7 @@ void *video_decoder::trampoline(void *p) {
             int res = video_queue->push(pFrame);
 //            __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
             if (res == -1) {
-                av_frame_unref(pFrame);
+                av_frame_free(&pFrame);
                 break;
             }
             av_packet_unref(packet);

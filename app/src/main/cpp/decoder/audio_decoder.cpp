@@ -124,7 +124,7 @@ void *audio_decoder::trampoline(void *p) {
             int res = audio_queue->push(pFrame);
             __android_log_print(ANDROID_LOG_DEBUG, "audio", " %lld, %d", pFrame->pts, pFrame->nb_samples);
             if (res == -1) {
-                av_frame_unref(pFrame);
+                av_frame_free(&pFrame);
                 break;
             }
             av_packet_unref(packet);

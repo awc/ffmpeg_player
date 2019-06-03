@@ -29,10 +29,10 @@ circle_av_packet_queue::circle_av_packet_queue() {
 
 circle_av_packet_queue::~circle_av_packet_queue() {
     pthread_mutex_lock(&mLock);
-    H264Packet *temp = head;
+    H264Packet *temp = nullptr;
     while (head != tail) {
         if (head->packet != nullptr) {
-            av_packet_unref(head->packet);
+            av_packet_free(&head->packet);
             temp = head;
             head = head->next;
             delete temp;
