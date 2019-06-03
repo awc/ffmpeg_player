@@ -22,6 +22,7 @@ extern "C" {
 #include "offscreen/on_screen_thread.h"
 
 static JavaVM *g_vm;
+bool destoryed = false;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_ffmpegplayer_MainActivity_stringFromJNI(JNIEnv *env, jobject instance) {
     return env->NewStringUTF(avcodec_configuration());
@@ -34,6 +35,7 @@ audio_looper *audioLooper = nullptr;
 ANativeWindow *nativeWindow = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceCreated(JNIEnv *env, jobject instance, jobject surface) {
+    destoryed = false;
     glLooper = new gl_looper();
     nativeWindow = ANativeWindow_fromSurface(env, surface);
     glLooper->postMessage(glLooper->kMsgSurfaceCreated, nativeWindow);
@@ -49,6 +51,7 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceChanged(JNIEnv *env
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, jobject instance) {
+    destoryed = true;
     if (glLooper != nullptr) {
         glLooper->postMessage(glLooper->kMsgSurfaceDestroyed);
         glLooper->quit();
@@ -91,6 +94,10 @@ bool renderFirstFrame = false;
 jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeMillis) {
+    if (destoryed) {
+        return;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG, "nativeDoFrame", "");
     int64_t pts = video_queue->pullAVFramePts();
     if (pts == 0) {
         start_time = frameTimeMillis;

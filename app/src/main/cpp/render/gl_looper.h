@@ -28,6 +28,8 @@ public:
 
 private:
     gl_renderer *renderer;
+
+    bool destroyed;
 };
 
 #endif //FFMPEG_PLAYER_GL_LOOPER_H

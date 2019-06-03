@@ -34,6 +34,8 @@ private:
     opensles_player *openslesPlayer = nullptr;
 
     audio_player *oboePlayer = nullptr;
+
+    bool destroyed;
 };
 
 #endif //FFMPEG_PLAYER_AUDIO_LOOPER_H

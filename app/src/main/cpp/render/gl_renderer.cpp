@@ -11,6 +11,10 @@ gl_renderer::gl_renderer() {
 }
 
 gl_renderer::~gl_renderer() {
+    if (filter != nullptr) {
+        delete filter;
+        filter = nullptr;
+    }
     if (windowSurface != nullptr) {
         windowSurface->release();
         delete windowSurface;
@@ -21,8 +25,6 @@ gl_renderer::~gl_renderer() {
         delete eglCore;
         eglCore = nullptr;
     }
-    delete filter;
-    filter = nullptr;
 }
 
 void gl_renderer::surfaceCreated(ANativeWindow *nativeWindow) {
@@ -48,6 +50,10 @@ void gl_renderer::surfaceChanged(int width, int height) {
 }
 
 void gl_renderer::surfaceDestroyed() {
+    if (filter != nullptr) {
+        delete filter;
+        filter = nullptr;
+    }
     if (windowSurface != nullptr) {
         windowSurface->release();
         delete windowSurface;

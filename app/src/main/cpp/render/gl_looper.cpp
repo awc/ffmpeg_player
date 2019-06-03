@@ -9,6 +9,7 @@ extern "C" {
 
 gl_looper::gl_looper() {
     renderer = new gl_renderer();
+    destroyed = false;
 }
 
 gl_looper::~gl_looper() {
@@ -31,13 +32,14 @@ void gl_looper::handleMessage(looper::LooperMessage *msg) {
             break;
         }
         case kMsgSurfaceDestroyed: {
+            destroyed = true;
             if (renderer != nullptr) {
                 renderer->surfaceDestroyed();
             }
             break;
         }
         case kMsgSurfaceDoFrame: {
-            if (renderer != nullptr) {
+            if (renderer != nullptr && !destroyed) {
                 renderer->surfaceDoFrame(static_cast<AVFrame *>(msg->obj));
             }
             break;

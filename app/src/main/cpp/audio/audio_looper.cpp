@@ -6,6 +6,7 @@
 
 audio_looper::audio_looper(circle_av_frame_queue *audioQueue) {
     this->audioQueue = audioQueue;
+    destroyed = false;
 }
 
 audio_looper::~audio_looper() {
@@ -26,6 +27,7 @@ void audio_looper::handleMessage(looper::LooperMessage *msg) {
             break;
         }
         case kMsgAudioPlayerDestroyed: {
+            destroyed = true;
             if (USE_OBOE) {
                 if (oboePlayer != nullptr) {
                     delete oboePlayer;
@@ -43,7 +45,7 @@ void audio_looper::handleMessage(looper::LooperMessage *msg) {
             if (USE_OBOE) {
 
             } else {
-                if (openslesPlayer != nullptr) {
+                if (openslesPlayer != nullptr && !destroyed) {
                     openslesPlayer->play();
                 }
             }

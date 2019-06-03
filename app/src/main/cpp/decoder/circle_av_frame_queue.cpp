@@ -3,6 +3,7 @@
 //
 
 #include <pthread.h>
+#include <android/log.h>
 #include "circle_av_frame_queue.h"
 
 extern "C" {
@@ -12,7 +13,6 @@ extern "C" {
 circle_av_frame_queue::circle_av_frame_queue() {
     pthread_mutex_init(&mLock, nullptr);
     pthread_cond_init(&mCondition, nullptr);
-    isAvailable = false;
 
     tail = new H264Frame();
     H264Frame *nextCursor = tail;
@@ -28,9 +28,12 @@ circle_av_frame_queue::circle_av_frame_queue() {
     tail->next = head;
     pushCursor = head;
     pullCursor = head;
+
+    isAvailable = true;
 }
 
 circle_av_frame_queue::~circle_av_frame_queue() {
+    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_delete");
     pthread_mutex_lock(&mLock);
     H264Frame *node = head;
     H264Frame *temp;
@@ -53,13 +56,19 @@ circle_av_frame_queue::~circle_av_frame_queue() {
     tail = nullptr;
     pushCursor = nullptr;
     pullCursor = nullptr;
+    isAvailable = false;
     pthread_mutex_unlock(&mLock);
 
-    pthread_mutex_destroy(&mLock);
+    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_destroy");
     pthread_cond_destroy(&mCondition);
+    pthread_mutex_destroy(&mLock);
 }
 
 void circle_av_frame_queue::push(AVFrame *avFrame) {
+    if (!isAvailable) {
+        return;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_lock");
     pthread_mutex_lock(&mLock);
     if (pushCursor->next == pullCursor) {
         pthread_cond_wait(&mCondition, &mLock);
@@ -70,17 +79,24 @@ void circle_av_frame_queue::push(AVFrame *avFrame) {
 }
 
 AVFrame *circle_av_frame_queue::pull() {
+    if (!isAvailable) {
+        return nullptr;
+    }
     if (pullCursor->next != pushCursor) {
         AVFrame *frame = pullCursor->frame;
         pullCursor = pullCursor->next;
         return frame;
     } else {
+        __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_cond_signal");
         pthread_cond_signal(&mCondition);
         return nullptr;
     }
 }
 
 int64_t circle_av_frame_queue::pullAVFramePts() {
+    if (!isAvailable) {
+        return -1;
+    }
     if (pullCursor->frame != nullptr) {
         return pullCursor->frame->pts;
     }

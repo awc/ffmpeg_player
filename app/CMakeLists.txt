@@ -31,6 +31,9 @@ add_library(native-lib
         src/main/cpp/offscreen/off_screen_thread.cpp
         src/main/cpp/offscreen/on_screen_thread.cpp
         src/main/cpp/encoder/video_encoder.cpp
+
+        src/main/cpp/dexmuxer/av_demuxer.cpp
+        src/main/cpp/dexmuxer/circle_av_packet_queue.cpp
         )
 
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/src/main/jniLibs)
