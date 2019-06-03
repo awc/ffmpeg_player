@@ -20,6 +20,7 @@ extern "C" {
 #include "audio/audio_looper.h"
 #include "offscreen/off_screen_thread.h"
 #include "offscreen/on_screen_thread.h"
+#include "dexmuxer/av_demuxer.h"
 
 static JavaVM *g_vm;
 bool destoryed = false;
@@ -77,6 +78,8 @@ audio_decoder *audioDecoder = nullptr;
 circle_av_frame_queue *video_queue = nullptr;
 circle_av_frame_queue *audio_queue = nullptr;
 video_audio_synchronizer *synchronizer = nullptr;
+
+av_demuxer *demuxer = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
     videoDecoder = new video_decoder();
@@ -87,6 +90,8 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject
     audio_queue = new circle_av_frame_queue();
 
     synchronizer = new video_audio_synchronizer();
+
+    demuxer = new av_demuxer();
 }
 
 int64_t start_time = 0;
@@ -137,8 +142,13 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
         videoDecoder->decode(path, video_queue, javaPlayerRef);
+    }
+    if (audioDecoder != nullptr) {
         audioDecoder->decode(path, audio_queue, audioLooper);
     }
+//    if (demuxer != nullptr) {
+//        demuxer->decode(path, new circle_av_packet_queue(), new circle_av_packet_queue());
+//    }
     //todo
 //    env->ReleaseStringUTFChars(url, path);
 }

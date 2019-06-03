@@ -30,6 +30,8 @@ void av_demuxer::decode(const char *url, circle_av_packet_queue *video_queue, ci
 void *av_demuxer::trampoline(void *p) {
     avformat_network_init();
     const char *url = ((av_demuxer *) p)->url;
+    circle_av_packet_queue *video_queue = ((av_demuxer *) p)->video_queue;
+    circle_av_packet_queue *audio_queue = ((av_demuxer *) p)->audio_queue;
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
         ALOGD("can not open", url)
@@ -51,12 +53,6 @@ void *av_demuxer::trampoline(void *p) {
         ALOGD("can not find video stream info")
         return nullptr;
     }
-    AVCodecContext *videoCodecContext = avcodec_alloc_context3(nullptr);
-    avcodec_parameters_to_context(videoCodecContext, formatContext->streams[video_stream_index]->codecpar);
-    AVCodec *videoCodec = avcodec_find_decoder(videoCodecContext->codec_id);
-    int size = videoCodecContext->width * videoCodecContext->height;
-    auto *packet = static_cast<AVPacket *>(malloc(sizeof(AVPacket)));
-    av_new_packet(packet, size);
     //audio
     int audio_stream_index = -1;
     for (int i = 0; i < formatContext->nb_streams; ++i) {
@@ -70,5 +66,21 @@ void *av_demuxer::trampoline(void *p) {
         return nullptr;
     }
 
+    while (true) {
+        auto *packet = av_packet_alloc();
+        if (av_read_frame(formatContext, packet) < 0) {
+            ALOGD("read frame end")
+            break;
+        }
+        if (packet->stream_index == video_stream_index) {
+            video_queue->push(packet);
+        } else if (packet->stream_index == audio_stream_index) {
+            audio_queue->push(packet);
+        }
+    }
+    avformat_close_input(&formatContext);
 
+    __android_log_print(ANDROID_LOG_DEBUG, "audio & video", " avPacket push over");
+    
+    return nullptr;
 }

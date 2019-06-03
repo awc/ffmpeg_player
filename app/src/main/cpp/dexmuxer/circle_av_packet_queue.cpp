@@ -3,6 +3,7 @@
 //
 
 #include <pthread.h>
+#include <android/log.h>
 #include "circle_av_packet_queue.h"
 
 circle_av_packet_queue::circle_av_packet_queue() {
@@ -60,7 +61,7 @@ void circle_av_packet_queue::push(AVPacket *packet) {
 }
 
 AVPacket *circle_av_packet_queue::pull() {
-    if (currSize < 10 && pullCursor->next != pushCursor) {
+    if (pullCursor->next != pushCursor) {
         AVPacket *packet = pullCursor->packet;
         pullCursor = pullCursor->next;
         currSize--;

@@ -9,7 +9,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 };
 
-#define DEFAULT_PACKET_SIZE 30
+#define DEFAULT_PACKET_SIZE 100
 
 struct H264Packet {
     AVPacket *packet;
