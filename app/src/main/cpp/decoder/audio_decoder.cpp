@@ -81,7 +81,8 @@ void *audio_decoder::trampoline(void *p) {
 //                                                codecContext->sample_rate, 0,
 //                                                nullptr);
     SwrContext *swrContext = swr_alloc();
-    av_opt_set_channel_layout(swrContext, "in_channel_layout", av_get_default_channel_layout(codecContext->channels), 0);
+    av_opt_set_channel_layout(swrContext, "in_channel_layout", av_get_default_channel_layout(codecContext->channels),
+                              0);
     av_opt_set_channel_layout(swrContext, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
     av_opt_set_int(swrContext, "in_sample_rate", codecContext->sample_rate, 0);
     av_opt_set_int(swrContext, "out_sample_rate", 44100, 0);
@@ -93,6 +94,9 @@ void *audio_decoder::trampoline(void *p) {
     int ret = 0;
     double ratio = av_q2d(formatContext->streams[audio_stream_index]->time_base) * 1000;
     while (true) {
+        if (p == nullptr) {
+            break;
+        }
         if (av_read_frame(formatContext, packet) < 0) {
             ALOGD("read frame end")
             break;
@@ -117,8 +121,12 @@ void *audio_decoder::trampoline(void *p) {
             } else {
                 pFrame->pts = static_cast<int64_t>(pFrame->pts * ratio);
             }
-            audio_queue->push(pFrame);
+            int res = audio_queue->push(pFrame);
             __android_log_print(ANDROID_LOG_DEBUG, "audio", " %lld, %d", pFrame->pts, pFrame->nb_samples);
+            if (res == -1) {
+                av_frame_unref(pFrame);
+                break;
+            }
             av_packet_unref(packet);
         }
     }
@@ -126,5 +134,6 @@ void *audio_decoder::trampoline(void *p) {
     avcodec_close(codecContext);
     avformat_close_input(&formatContext);
 
+    __android_log_print(ANDROID_LOG_DEBUG, "audio", " decoder over");
     return nullptr;
 }

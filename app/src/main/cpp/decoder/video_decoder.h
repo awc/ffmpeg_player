@@ -34,6 +34,7 @@ private:
     JNIEnv *env = nullptr;
 
     jobject javaPlayer;
+
 };
 
 #endif //FFMPEG_PLAYER_FFMPEG_DECODER_H

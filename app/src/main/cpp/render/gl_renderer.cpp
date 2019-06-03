@@ -50,20 +50,20 @@ void gl_renderer::surfaceChanged(int width, int height) {
 }
 
 void gl_renderer::surfaceDestroyed() {
-    if (filter != nullptr) {
-        delete filter;
-        filter = nullptr;
-    }
-    if (windowSurface != nullptr) {
-        windowSurface->release();
-        delete windowSurface;
-        windowSurface = nullptr;
-    }
-    if (eglCore != nullptr) {
-        eglCore->release();
-        delete eglCore;
-        eglCore = nullptr;
-    }
+//    if (filter != nullptr) {
+//        delete filter;
+//        filter = nullptr;
+//    }
+//    if (windowSurface != nullptr) {
+//        windowSurface->release();
+//        delete windowSurface;
+//        windowSurface = nullptr;
+//    }
+//    if (eglCore != nullptr) {
+//        eglCore->release();
+//        delete eglCore;
+//        eglCore = nullptr;
+//    }
 }
 
 void gl_renderer::surfaceDoFrame(AVFrame *avFrame) {

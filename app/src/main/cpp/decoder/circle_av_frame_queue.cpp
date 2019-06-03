@@ -33,7 +33,6 @@ circle_av_frame_queue::circle_av_frame_queue() {
 }
 
 circle_av_frame_queue::~circle_av_frame_queue() {
-    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_delete");
     pthread_mutex_lock(&mLock);
     H264Frame *node = head;
     H264Frame *temp;
@@ -59,16 +58,14 @@ circle_av_frame_queue::~circle_av_frame_queue() {
     isAvailable = false;
     pthread_mutex_unlock(&mLock);
 
-    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_destroy");
     pthread_cond_destroy(&mCondition);
     pthread_mutex_destroy(&mLock);
 }
 
-void circle_av_frame_queue::push(AVFrame *avFrame) {
+int circle_av_frame_queue::push(AVFrame *avFrame) {
     if (!isAvailable) {
-        return;
+        return -1;
     }
-    __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_mutex_lock");
     pthread_mutex_lock(&mLock);
     if (pushCursor->next == pullCursor) {
         pthread_cond_wait(&mCondition, &mLock);
@@ -76,6 +73,7 @@ void circle_av_frame_queue::push(AVFrame *avFrame) {
     pushCursor->frame = avFrame;
     pushCursor = pushCursor->next;
     pthread_mutex_unlock(&mLock);
+    return 0;
 }
 
 AVFrame *circle_av_frame_queue::pull() {
@@ -87,7 +85,6 @@ AVFrame *circle_av_frame_queue::pull() {
         pullCursor = pullCursor->next;
         return frame;
     } else {
-        __android_log_print(ANDROID_LOG_DEBUG, "video", "pthread_cond_signal");
         pthread_cond_signal(&mCondition);
         return nullptr;
     }

@@ -33,6 +33,9 @@ void _playCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     auto player = (opensles_player *) context;
     auto swrContext = ((opensles_player *) context)->swrContext;
     auto queue = player->audioQueue;
+    if (queue == nullptr) {
+        return;
+    }
     auto frame = queue->pull();
     if (frame != nullptr && swrContext != nullptr) {
         int size = av_samples_get_buffer_size(nullptr, av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO),

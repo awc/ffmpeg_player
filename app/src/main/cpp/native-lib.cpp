@@ -52,6 +52,10 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceChanged(JNIEnv *env
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, jobject instance) {
     destoryed = true;
+    if (nativeWindow != nullptr) {
+        ANativeWindow_release(nativeWindow);
+        nativeWindow = nullptr;
+    }
     if (glLooper != nullptr) {
         glLooper->postMessage(glLooper->kMsgSurfaceDestroyed);
         glLooper->quit();
@@ -63,10 +67,6 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDestroyed(JNIEnv *env, job
         audioLooper->quit();
         delete audioLooper;
         audioLooper = nullptr;
-    }
-    if (nativeWindow != nullptr) {
-        ANativeWindow_release(nativeWindow);
-        nativeWindow = nullptr;
     }
 }
 
@@ -105,7 +105,6 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
     if (synchronizer->syncVideo(pts, frameTimeMillis - start_time)) {
         AVFrame *frame = video_queue->pull();
         if (frame != nullptr) {
-//            __android_log_print(ANDROID_LOG_DEBUG, "doFrameSuccess", " %lld, %lld", pts, frameTimeMillis - start_time);
             glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
 
             if (!renderFirstFrame && javaPlayerRef != nullptr) {
@@ -156,10 +155,14 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerPause(JNIEnv *env, jobjec
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobject instance) {
-    delete videoDecoder;
-    videoDecoder = nullptr;
-    delete audioDecoder;
-    audioDecoder = nullptr;
+    if (videoDecoder != nullptr) {
+        delete videoDecoder;
+        videoDecoder = nullptr;
+    }
+    if (audioDecoder != nullptr) {
+        delete audioDecoder;
+        audioDecoder = nullptr;
+    }
     delete video_queue;
     video_queue = nullptr;
     delete audio_queue;
@@ -208,7 +211,8 @@ Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOffScreenTask(J
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_offScreen_OffScreenUtil_nativeStartOnScreenTask(JNIEnv *env, jobject instance,
-                                                                               jstring path, jstring destPath,jobject surface) {
+                                                                              jstring path, jstring destPath,
+                                                                              jobject surface) {
     const char *src = env->GetStringUTFChars(path, nullptr);
     const char *dest = env->GetStringUTFChars(destPath, nullptr);
     __android_log_print(ANDROID_LOG_DEBUG, "video path ", ": %s, %s", src, dest);

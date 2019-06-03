@@ -18,7 +18,6 @@ video_decoder::video_decoder() {
 }
 
 video_decoder::~video_decoder() {
-
 }
 
 void video_decoder::decode(const char *url, circle_av_frame_queue *video_queue, jobject javaPlayerRef) {
@@ -112,8 +111,12 @@ void *video_decoder::trampoline(void *p) {
             } else {
                 pFrame->pts = static_cast<int64_t>(pFrame->pts * ratio);
             }
-            video_queue->push(pFrame);
+            int res = video_queue->push(pFrame);
 //            __android_log_print(ANDROID_LOG_DEBUG, "video", " %lld, %d", pFrame->pts, packet->size);
+            if (res == -1) {
+                av_frame_unref(pFrame);
+                break;
+            }
             av_packet_unref(packet);
         }
     }
@@ -124,5 +127,7 @@ void *video_decoder::trampoline(void *p) {
     if (vm != nullptr) {
         vm->DetachCurrentThread();
     }
+
+    __android_log_print(ANDROID_LOG_DEBUG, "video", " decoder over");
     return nullptr;
 }

@@ -25,7 +25,7 @@ public:
 
     virtual ~circle_av_frame_queue();
 
-    void push(AVFrame *avFrame);
+    int push(AVFrame *avFrame);
 
     AVFrame *pull();
 
