@@ -41,6 +41,8 @@ void gl_renderer::surfaceCreated(ANativeWindow *nativeWindow) {
     filter = new base_filter();
     filter->init_program();
 
+    bgFilter = new bg_filter();
+    bgFilter->init_program();
 }
 
 void gl_renderer::surfaceChanged(int width, int height) {
@@ -72,6 +74,8 @@ void gl_renderer::surfaceDestroyed() {
 void gl_renderer::surfaceDoFrame(AVFrame *avFrame) {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    bgFilter->drawFrame(avFrame);
 
     filter->drawFrame(avFrame);
 

@@ -9,6 +9,8 @@
 #include "../egl/egl_core.h"
 #include "../egl/window_surface.h"
 #include "../filter/base_filter.h"
+#include "../filter/bg_filter.h"
+
 extern "C" {
 #include <libavutil/frame.h>
 };
@@ -35,6 +37,8 @@ private:
     window_surface *windowSurface;
 
     base_filter *filter;
+
+    bg_filter *bgFilter;
 };
 
 #endif //FFMPEG_PLAYER_GL_RENDERER_H
