@@ -47,6 +47,9 @@ void gl_renderer::surfaceChanged(int width, int height) {
     windowSurface->makeCurrent();
     glViewport(0, 0, width, height);
     windowSurface->swapBuffer();
+
+    filter->screen_width = width;
+    filter->screen_height = height;
 }
 
 void gl_renderer::surfaceDestroyed() {

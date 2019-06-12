@@ -38,6 +38,8 @@ void base_filter::init_program() {
 
 void base_filter::drawFrame(AVFrame *avFrame) {
 
+    checkVideoSize(avFrame);
+
     glUseProgram(program);
 
     GLint vertexCount = sizeof(vertex) / (sizeof(vertex[0]) * 2);
@@ -51,6 +53,9 @@ void base_filter::drawFrame(AVFrame *avFrame) {
 
     uTextureMatrixLocation = glGetUniformLocation(program, uTextureMatrix);
     glUniformMatrix4fv(uTextureMatrixLocation, 1, GL_FALSE, this->textureMatrix->m);
+
+    uCoordMatrixLocation = glGetUniformLocation(program, uCoordinateMatrix);
+    glUniformMatrix4fv(uCoordMatrixLocation, 1, GL_FALSE, this->uCoordMatrix->m);
 
     uTextureYLocation = glGetUniformLocation(program, uTextureY);
     glActiveTexture(GL_TEXTURE0);
@@ -101,4 +106,28 @@ void base_filter::initMatrix() {
     textureMatrix->m[13] = 1.0f;
     textureMatrix->m[14] = 0.0f;
     textureMatrix->m[15] = 1.0f;
+}
+
+void base_filter::checkVideoSize(AVFrame *frame) {
+    int width = frame->width;
+    int height = frame->height;
+    if (this->width != width || this->height != height) {
+        this->width = width;
+        this->height = height;
+        initCoordMatrix();
+        if (screen_width > 0 && screen_height > 0) {
+            float screen_ratio = screen_width * 1.0f / screen_height;
+            float video_ratio = width * 1.0f / height;
+            if (video_ratio > screen_ratio) {
+                scaleM(uCoordMatrix, 0, 1.0f, screen_ratio / video_ratio, 1.0f);
+            } else {
+                scaleM(uCoordMatrix, 0, 1.0f, video_ratio / screen_ratio, 1.0f);
+            }
+        }
+    }
+}
+
+void base_filter::initCoordMatrix() {
+    uCoordMatrix = new ESMatrix();
+    setIdentityM(uCoordMatrix);
 }

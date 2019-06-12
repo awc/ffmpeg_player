@@ -7,6 +7,7 @@
 
 #include <GLES3/gl3.h>
 #include "../common/matrix_util.h"
+
 extern "C" {
 #include <libavutil/frame.h>
 };
@@ -40,6 +41,9 @@ public:
 
     void drawFrame(AVFrame *avFrame);
 
+    int screen_width = 0;
+    int screen_height = 0;
+
 private:
 
     int width;
@@ -55,22 +59,25 @@ private:
     const GLchar *uTextureY = "uTextureY";
     const GLchar *uTextureU = "uTextureU";
     const GLchar *uTextureV = "uTextureV";
+    const GLchar *uCoordinateMatrix = "uCoordMatrix";
     GLint aPositionLocation = -1.0;
     GLint aTextureCoordinateLocation = -1.0;
     GLint uTextureMatrixLocation = -1.0;
     GLint uTextureYLocation = -1.0;
     GLint uTextureULocation = -1.0;
     GLint uTextureVLocation = -1.0;
+    GLint uCoordMatrixLocation = -1.0;
 
     const char *vertex_shader_string = {
             "uniform mat4 uTextureMatrix;\n"
             "attribute vec4 aPosition;\n"
             "attribute vec4 aTextureCoordinate;\n"
             "varying vec2 vTextureCoord;\n"
+            "uniform mat4 uCoordMatrix;\n"
             "void main()\n"
             "{\n"
             "    vTextureCoord = (uTextureMatrix * aTextureCoordinate).xy;\n"
-            "    gl_Position = aPosition;\n"
+            "    gl_Position = uCoordMatrix * aPosition;\n"
             "}\n"
     };
 //    const char *fragment_shader_string = {
@@ -91,7 +98,7 @@ private:
 //            "}\n"
 //    };
 
-    const char* fragment_shader_string = {
+    const char *fragment_shader_string = {
             "precision highp float;\n"
             "uniform sampler2D uTextureY;\n"
             "uniform sampler2D uTextureU;\n"
@@ -116,6 +123,12 @@ private:
     GLuint yTexture;
     GLuint uTexture;
     GLuint vTexture;
+
+    void checkVideoSize(AVFrame *frame);
+
+    ESMatrix *uCoordMatrix;
+
+    void initCoordMatrix();
 };
 
 #endif //FFMPEG_PLAYER_BASE_FILTER_H

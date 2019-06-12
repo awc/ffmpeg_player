@@ -18,13 +18,13 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
     }
 
     override fun onVideoSizeChanged(width: Int, height: Int) {
-        val layoutParams = surface_view.layoutParams
-        if (width * 1f / height < surface_view.width * 1f / surface_view.height) {
-            layoutParams.width = (width * 1f / height * surface_view.height).toInt()
-        } else {
-            layoutParams.height = (surface_view.width / (width * 1f / height)).toInt()
-        }
-        surface_view.layoutParams = layoutParams
+//        val layoutParams = surface_view.layoutParams
+//        if (width * 1f / height < surface_view.width * 1f / surface_view.height) {
+//            layoutParams.width = (width * 1f / height * surface_view.height).toInt()
+//        } else {
+//            layoutParams.height = (surface_view.width / (width * 1f / height)).toInt()
+//        }
+//        surface_view.layoutParams = layoutParams
     }
 
     override fun surfaceCreated(surface: Surface) {
