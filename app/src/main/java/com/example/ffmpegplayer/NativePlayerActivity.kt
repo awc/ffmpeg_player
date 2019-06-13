@@ -34,7 +34,9 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
 //        val path = "http://oimryzjfe.qnssl.com/content/1F3D7F815F2C6870FB512B8CA2C3D2C1.mp4"
 //        val path = "http://pv1.pebkit.com/video/7104/f45d2f17288caa60906c6f37ff7b447e6f35088ar1-720-1280_raw.mp4"
 //        val path = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "test.mp3")}"
-        nativePlayer.setDataSource(path)
+        val bgPath = "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer111.mp4")}"
+//        nativePlayer.setDataSource(path)
+        nativePlayer.setDataSource(path, bgPath)
         nativePlayer.start()
     }
 

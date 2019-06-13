@@ -20,6 +20,7 @@ public:
         void *obj;
         LooperMessage *next;
         bool quit;
+        void *obj1;
     };
 
 public:
@@ -32,9 +33,13 @@ public:
 
     void postMessage(int what, void *obj);
 
+    void postMessage(int what, void *obj, void *obj1);
+
     void postMessage(int what, int arg1, int arg2);
 
     void postMessage(int what, int arg1, int arg2, void *obj);
+
+    void postMessage(int what, int arg1, int arg2, void *obj, void *obj1);
 
     virtual void handleMessage(LooperMessage *msg);
 

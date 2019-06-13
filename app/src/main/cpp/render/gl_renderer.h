@@ -30,6 +30,8 @@ public:
 
     void surfaceDoFrame(AVFrame *avFrame);
 
+    void surfaceDoFrames(AVFrame *avFrame, AVFrame *bgFrame);
+
 private:
 
     egl_core *eglCore;

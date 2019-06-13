@@ -44,6 +44,11 @@ void gl_looper::handleMessage(looper::LooperMessage *msg) {
             }
             break;
         }
+        case kMsgSurfaceDoFrames: {
+            if (renderer != nullptr && !destroyed) {
+                renderer->surfaceDoFrames(static_cast<AVFrame *>(msg->obj), static_cast<AVFrame *>(msg->obj1));
+            }
+        }
         default:
             break;
     }

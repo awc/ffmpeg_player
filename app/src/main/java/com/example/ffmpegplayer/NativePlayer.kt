@@ -26,6 +26,10 @@ class NativePlayer(private val context: Context) {
         nativePlayerSetDataSource(url, this)
     }
 
+    fun setDataSource(url: String, bgUrl: String) {
+        nativePlayerSetDataSources(url, bgUrl, this)
+    }
+
     fun start() {
         nativePlayerStart()
     }
@@ -66,4 +70,5 @@ class NativePlayer(private val context: Context) {
     private external fun nativePlayerStart()
     private external fun nativePlayerPause()
     private external fun nativePlayerRelease()
+    private external fun nativePlayerSetDataSources(url: String, bgUrl: String, player: NativePlayer)
 }

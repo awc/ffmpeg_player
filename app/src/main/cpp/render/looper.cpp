@@ -31,17 +31,26 @@ void looper::postMessage(int what, void *obj) {
     postMessage(what, 0, 0, obj);
 }
 
+void looper::postMessage(int what, void *obj, void *obj1) {
+    postMessage(what, 0, 0, obj, obj1);
+}
+
 void looper::postMessage(int what, int arg1, int arg2) {
     postMessage(what, arg1, arg2, nullptr);
 }
 
 void looper::postMessage(int what, int arg1, int arg2, void *obj) {
+    postMessage(what, arg1, arg2, obj, nullptr);
+}
+
+void looper::postMessage(int what, int arg1, int arg2, void *obj, void *obj1) {
     auto *msg = new LooperMessage();
     msg->what = what;
     msg->arg1 = arg1;
     msg->arg2 = arg2;
     msg->obj = obj;
     msg->quit = false;
+    msg->obj1 = obj1;
     addMessage(msg);
 }
 

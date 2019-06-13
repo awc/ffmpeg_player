@@ -81,3 +81,18 @@ void gl_renderer::surfaceDoFrame(AVFrame *avFrame) {
 
     windowSurface->swapBuffer();
 }
+
+void gl_renderer::surfaceDoFrames(AVFrame *avFrame, AVFrame *bgFrame) {
+//    glClearColor(0.0, 0.0, 0.0, 1.0);
+//    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (bgFrame != nullptr) {
+        bgFilter->drawFrame(bgFrame);
+        av_frame_free(&bgFrame);
+    }
+    if (avFrame != nullptr) {
+        filter->drawFrame(avFrame);
+    }
+    windowSurface->swapBuffer();
+
+}
