@@ -59,27 +59,27 @@ void bg_filter::drawFrame(AVFrame *avFrame) {
     glUniformMatrix4fv(uCoordMatrixLocation, 1, GL_FALSE, this->uCoordMatrix->m);
 
     uTextureYLocation = glGetUniformLocation(program, uTextureY);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, yTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width, avFrame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
                  avFrame->data[0]);
-    glUniform1i(uTextureYLocation, 0);
+    glUniform1i(uTextureYLocation, 3);
 
     uTextureULocation = glGetUniformLocation(program, uTextureU);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, uTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
                  avFrame->data[1]);
-    glUniform1i(uTextureULocation, 1);
+    glUniform1i(uTextureULocation, 4);
 
     uTextureVLocation = glGetUniformLocation(program, uTextureV);
-    glActiveTexture(GL_TEXTURE2);
+    glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, vTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
                  avFrame->data[2]);
-    glUniform1i(uTextureVLocation, 2);
+    glUniform1i(uTextureVLocation, 5);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glDisableVertexAttribArray(aPositionLocation);
