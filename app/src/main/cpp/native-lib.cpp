@@ -24,6 +24,7 @@ extern "C" {
 
 static JavaVM *g_vm;
 bool destoryed = false;
+bool singleSource = false;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_ffmpegplayer_MainActivity_stringFromJNI(JNIEnv *env, jobject instance) {
     return env->NewStringUTF(avcodec_configuration());
@@ -107,7 +108,7 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
     if (destoryed) {
         return;
     }
-    if (bgVideoDecoder == nullptr) {
+    if (singleSource || bgVideoDecoder == nullptr) {
         __android_log_print(ANDROID_LOG_DEBUG, "nativeDoFrame", "");
         int64_t pts = video_queue->pullAVFramePts();
         if (pts == 0) {
@@ -175,6 +176,7 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url,
                                                                      jobject javaPlayer) {
+    singleSource = true;
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
@@ -193,6 +195,7 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSources(JNIEnv *env, jobject instance, jstring url, jstring bgUrl,
                                                                      jobject javaPlayer) {
+    singleSource = false;
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {

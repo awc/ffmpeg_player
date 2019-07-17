@@ -14,13 +14,23 @@
     />
 
     <Button
+            android:id="@+id/playPipBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play Video"
+            android:textAllCaps="false"
+            android:layout_centerInParent="true"
+            android:layout_below="@id/playBtn"
+            />
+
+    <Button
             android:id="@+id/compileBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Compile Video"
             android:textAllCaps="false"
             android:layout_centerInParent="true"
-            android:layout_below="@id/playBtn"
+            android:layout_below="@id/playPipBtn"
     />
 
 

@@ -33,17 +33,26 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, NativePlayerActivity::class.java)
             startActivity(intent)
         }
+        playPipBtn.setOnClickListener {
+            val intent = Intent(this, NativePipPlayerActivity::class.java)
+            startActivity(intent)
+        }
         compileBtn.setOnClickListener {
             val intent = Intent(this, OffScreenActivity::class.java)
             startActivity(intent)
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            
+
         } else {
-            Toast.makeText(this, "must need write external storage permission!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "must need write external storage permission!", Toast.LENGTH_LONG)
+                .show()
         }
     }
 
