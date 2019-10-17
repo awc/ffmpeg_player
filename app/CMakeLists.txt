@@ -79,12 +79,12 @@ set_target_properties(avfilter
         PROPERTIES IMPORTED_LOCATION
         ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavfilter.so)
 
-add_library(avdevice
-        SHARED
-        IMPORTED)
-set_target_properties(avdevice
-        PROPERTIES IMPORTED_LOCATION
-        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavdevice.so)
+#add_library(avdevice
+#        SHARED
+#        IMPORTED)
+#set_target_properties(avdevice
+#        PROPERTIES IMPORTED_LOCATION
+#        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavdevice.so)
 
 add_library(x264
         SHARED
@@ -96,7 +96,7 @@ set_target_properties(x264
 include_directories(${JNI_LIBS_DIR}/includes)
 
 target_link_libraries(native-lib
-        avutil swresample swscale avcodec avformat avfilter avdevice x264
+        avutil swresample swscale avcodec avformat avfilter x264
         ${log-lib} ${android-lib}
         android EGL GLESv3 jnigraphics OpenSLES
         oboe

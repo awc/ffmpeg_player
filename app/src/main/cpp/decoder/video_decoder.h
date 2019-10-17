@@ -13,7 +13,7 @@
 class video_decoder {
 
 public:
-    video_decoder();
+    video_decoder(bool usingMediacodec);
 
     virtual ~video_decoder();
 
@@ -34,6 +34,8 @@ private:
     JNIEnv *env = nullptr;
 
     jobject javaPlayer;
+
+    bool usingMediacodec;
 
 };
 

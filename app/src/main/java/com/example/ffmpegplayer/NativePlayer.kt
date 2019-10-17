@@ -11,7 +11,7 @@ import android.os.Build
 class NativePlayer(private val context: Context) {
 
     init {
-        nativePlayerInit()
+        nativePlayerInit(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             val myAudioMgr = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val sampleRateStr = myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)
@@ -64,7 +64,7 @@ class NativePlayer(private val context: Context) {
         const val TAG = "NativePlayer"
     }
 
-    private external fun nativePlayerInit()
+    private external fun nativePlayerInit(usingMediaCodec: Boolean)
     private external fun nativeAudioInit(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     private external fun nativePlayerSetDataSource(url: String, player: NativePlayer)
     private external fun nativePlayerStart()

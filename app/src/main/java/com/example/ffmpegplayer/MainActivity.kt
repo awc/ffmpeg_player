@@ -32,10 +32,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, NativePlayerActivity::class.java)
             startActivity(intent)
         }
-        playPipBtn.setOnClickListener {
-            val intent = Intent(this, NativePipPlayerActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     override fun onRequestPermissionsResult(

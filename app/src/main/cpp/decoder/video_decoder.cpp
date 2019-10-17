@@ -13,8 +13,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-video_decoder::video_decoder() {
-
+video_decoder::video_decoder(bool usingMediacodec) {
+    this->usingMediacodec = usingMediacodec;
 }
 
 video_decoder::~video_decoder() {
@@ -35,6 +35,7 @@ void *video_decoder::trampoline(void *p) {
     JavaVM *vm = ((video_decoder *) p)->vm;
     const char *url = ((video_decoder *) p)->url;
     JNIEnv *jniEnv = ((video_decoder *) p)->env;
+    bool usingMediaCodec = ((video_decoder *) p)->usingMediacodec;
     if (vm != nullptr) {
         vm->AttachCurrentThread(&jniEnv, nullptr);
     }
@@ -65,7 +66,17 @@ void *video_decoder::trampoline(void *p) {
     }
     AVCodecContext *codecContext = avcodec_alloc_context3(nullptr);
     avcodec_parameters_to_context(codecContext, formatContext->streams[video_stream_index]->codecpar);
-    AVCodec *videoCodec = avcodec_find_decoder(codecContext->codec_id);
+
+    //
+    AVCodec *videoCodec = nullptr;
+    if (usingMediaCodec) {
+        videoCodec = avcodec_find_decoder_by_name("h264_mediacodec");
+    } else {
+        videoCodec = avcodec_find_decoder(codecContext->codec_id);
+    }
+    assert(videoCodec != nullptr);
+
+    //
     //打开解码器
     if (avcodec_open2(codecContext, videoCodec, nullptr) < 0) {
         ALOGD("can not open video decoder")

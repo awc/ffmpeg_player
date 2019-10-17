@@ -23,7 +23,6 @@ extern "C" {
 
 static JavaVM *g_vm;
 bool destoryed = false;
-bool singleSource = false;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_ffmpegplayer_MainActivity_stringFromJNI(JNIEnv *env, jobject instance) {
     return env->NewStringUTF(avcodec_configuration());
@@ -35,7 +34,8 @@ gl_looper *glLooper = nullptr;
 audio_looper *audioLooper = nullptr;
 ANativeWindow *nativeWindow = nullptr;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceCreated(JNIEnv *env, jobject instance, jobject surface) {
+Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceCreated(JNIEnv *env, jobject instance,
+                                                                     jobject surface) {
     destoryed = false;
     glLooper = new gl_looper();
     nativeWindow = ANativeWindow_fromSurface(env, surface);
@@ -43,7 +43,8 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceCreated(JNIEnv *env
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceChanged(JNIEnv *env, jobject instance, jint width,
+Java_com_example_ffmpegplayer_NativeSurfaceView_nativeSurfaceChanged(JNIEnv *env, jobject instance,
+                                                                     jint width,
                                                                      jint height) {
     if (glLooper != nullptr) {
         glLooper->postMessage(glLooper->kMsgSurfaceChanged, width, height);
@@ -78,13 +79,12 @@ audio_decoder *audioDecoder = nullptr;
 circle_av_frame_queue *video_queue = nullptr;
 circle_av_frame_queue *audio_queue = nullptr;
 video_audio_synchronizer *synchronizer = nullptr;
-video_decoder *bgVideoDecoder = nullptr;
-circle_av_frame_queue *bg_video_queue = nullptr;
 
 av_demuxer *demuxer = nullptr;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance) {
-    videoDecoder = new video_decoder();
+Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance,
+                                                            jboolean usingMediaCodec) {
+    videoDecoder = new video_decoder(usingMediaCodec);
     videoDecoder->vm = g_vm;
     audioDecoder = new audio_decoder();
 
@@ -94,72 +94,26 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject
     synchronizer = new video_audio_synchronizer();
 
     demuxer = new av_demuxer();
-
-    bgVideoDecoder = new video_decoder();
-    bg_video_queue = new circle_av_frame_queue();
 }
 
 int64_t start_time = 0;
 bool renderFirstFrame = false;
 jobject javaPlayerRef = nullptr;
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne, jlong frameTimeMillis) {
+Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobject instacne,
+                                                              jlong frameTimeMillis) {
     if (destoryed) {
         return;
     }
-    if (singleSource || bgVideoDecoder == nullptr) {
-        __android_log_print(ANDROID_LOG_DEBUG, "nativeDoFrame", "");
-        int64_t pts = video_queue->pullAVFramePts();
-        if (pts == 0) {
-            start_time = frameTimeMillis;
-        }
-        if (synchronizer->syncVideo(pts, frameTimeMillis - start_time)) {
-            AVFrame *frame = video_queue->pull();
-            if (frame != nullptr) {
-                glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
-
-                if (!renderFirstFrame && javaPlayerRef != nullptr) {
-                    jclass clazz = env->GetObjectClass(javaPlayerRef);
-                    jmethodID methodId = env->GetMethodID(clazz, "onRenderFirstFrame", "()V");
-                    env->CallVoidMethod(javaPlayerRef, methodId);
-                    renderFirstFrame = true;
-                }
-            }
-        }
-
-        int64_t audio_pts = audio_queue->pullAVFramePts();
-        if (synchronizer->syncAudio(audio_pts, frameTimeMillis - start_time)) {
-            audioLooper->postMessage(audioLooper->kMsgAudioPlayerDoFrame);
-
-            if (!renderFirstFrame && javaPlayerRef != nullptr) {
-                jclass clazz = env->GetObjectClass(javaPlayerRef);
-                jmethodID methodId = env->GetMethodID(clazz, "onRenderFirstFrame", "()V");
-                env->CallVoidMethod(javaPlayerRef, methodId);
-                renderFirstFrame = true;
-            }
-        }
-    } else {
-        //video && bg
-        int64_t pts = video_queue->pullAVFramePts();
-        if (pts == 0) {
-            start_time = frameTimeMillis;
-        }
-        int64_t bgPts = bg_video_queue->pullAVFramePts();
-        if (bgPts == 0) {
-            start_time = frameTimeMillis;
-        }
-        AVFrame *frame = nullptr;
-        AVFrame *bgFrame = nullptr;
-        if (synchronizer->syncVideo(pts, frameTimeMillis - start_time) && synchronizer->syncVideo(bgPts, frameTimeMillis)) {
-            frame = video_queue->pull();
-            bgFrame = bg_video_queue->pull();
-            glLooper->postMessage(glLooper->kMsgSurfaceDoFrames, frame, bgFrame);
-        }
-
-        //audio
-        int64_t audio_pts = audio_queue->pullAVFramePts();
-        if (synchronizer->syncAudio(audio_pts, frameTimeMillis - start_time)) {
-            audioLooper->postMessage(audioLooper->kMsgAudioPlayerDoFrame);
+    __android_log_print(ANDROID_LOG_DEBUG, "nativeDoFrame", "");
+    int64_t pts = video_queue->pullAVFramePts();
+    if (pts == 0) {
+        start_time = frameTimeMillis;
+    }
+    if (synchronizer->syncVideo(pts, frameTimeMillis - start_time)) {
+        AVFrame *frame = video_queue->pull();
+        if (frame != nullptr) {
+            glLooper->postMessage(glLooper->kMsgSurfaceDoFrame, frame);
 
             if (!renderFirstFrame && javaPlayerRef != nullptr) {
                 jclass clazz = env->GetObjectClass(javaPlayerRef);
@@ -169,13 +123,24 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
             }
         }
     }
-//    __android_log_print(ANDROID_LOG_DEBUG, "doFrameFail", " %lld, %lld", pts, frameTimeMillis - start_time);
+
+    int64_t audio_pts = audio_queue->pullAVFramePts();
+    if (synchronizer->syncAudio(audio_pts, frameTimeMillis - start_time)) {
+        audioLooper->postMessage(audioLooper->kMsgAudioPlayerDoFrame);
+
+        if (!renderFirstFrame && javaPlayerRef != nullptr) {
+            jclass clazz = env->GetObjectClass(javaPlayerRef);
+            jmethodID methodId = env->GetMethodID(clazz, "onRenderFirstFrame", "()V");
+            env->CallVoidMethod(javaPlayerRef, methodId);
+            renderFirstFrame = true;
+        }
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance, jstring url,
+Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env, jobject instance,
+                                                                     jstring url,
                                                                      jobject javaPlayer) {
-    singleSource = true;
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
@@ -192,9 +157,9 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSources(JNIEnv *env, jobject instance, jstring url, jstring bgUrl,
-                                                                     jobject javaPlayer) {
-    singleSource = false;
+Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSources(JNIEnv *env, jobject instance,
+                                                                      jstring url, jstring bgUrl,
+                                                                      jobject javaPlayer) {
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
     if (videoDecoder != nullptr) {
@@ -202,11 +167,6 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSources(JNIEnv *en
     }
     if (audioDecoder != nullptr) {
         audioDecoder->decode(path, audio_queue, audioLooper);
-    }
-
-    const char *bgPath = env->GetStringUTFChars(bgUrl, nullptr);
-    if (bgVideoDecoder != nullptr) {
-        bgVideoDecoder->decode(bgPath, bg_video_queue, nullptr);
     }
 //    if (demuxer != nullptr) {
 //        demuxer->decode(path, new circle_av_packet_queue(), new circle_av_packet_queue());
@@ -250,10 +210,12 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerRelease(JNIEnv *env, jobj
 
 //audio
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_ffmpegplayer_NativePlayer_nativeAudioInit(JNIEnv *env, jobject instance, jint defaultSampleRate,
+Java_com_example_ffmpegplayer_NativePlayer_nativeAudioInit(JNIEnv *env, jobject instance,
+                                                           jint defaultSampleRate,
                                                            jint defaultFramesPerBurst) {
     audioLooper = new audio_looper(audio_queue);
-    audioLooper->postMessage(audioLooper->kMsgAudioPlayerCreated, defaultSampleRate, defaultFramesPerBurst,
+    audioLooper->postMessage(audioLooper->kMsgAudioPlayerCreated, defaultSampleRate,
+                             defaultFramesPerBurst,
                              audio_queue);
 }
 
