@@ -10,8 +10,7 @@ extern "C" {
 }
 
 base_filter::base_filter() {
-    initVertexShader();
-    initFragmentShader();
+
 }
 
 base_filter::~base_filter() {
@@ -23,6 +22,8 @@ base_filter::~base_filter() {
 }
 
 void base_filter::init_program() {
+    initVertexShader();
+    initFragmentShader();
     vertexShader = loadShader(GL_VERTEX_SHADER, vertex_shader_string);
     fragmentShader = loadShader(GL_FRAGMENT_SHADER, fragment_shader_string);
     program = createShaderProgram(vertexShader, fragmentShader);

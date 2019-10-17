@@ -38,6 +38,9 @@ private:
 
     base_filter *filter;
 
+    void initFilter(AVFrame *avFrame);
+
+    int screen_width, screen_height;
 };
 
 #endif //FFMPEG_PLAYER_GL_RENDERER_H

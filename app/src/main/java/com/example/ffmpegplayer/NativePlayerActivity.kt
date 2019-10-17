@@ -2,6 +2,7 @@ package com.example.ffmpegplayer
 
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
 import com.example.ffmpegplayer.server.PlayerCacheServer
@@ -15,19 +16,14 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContentView(R.layout.activity_native_player)
         surface_view.surfaceCallback = this
         playerCacheServer = PlayerCacheServer.getInstance(applicationContext)
     }
 
     override fun onVideoSizeChanged(width: Int, height: Int) {
-        val layoutParams = surface_view.layoutParams
-        if (width * 1f / height < surface_view.width * 1f / surface_view.height) {
-            layoutParams.width = (width * 1f / height * surface_view.height).toInt()
-        } else {
-            layoutParams.height = (surface_view.width / (width * 1f / height)).toInt()
-        }
-        surface_view.layoutParams = layoutParams
+        Log.d(TAG, "onVideoSizeChanged $width $height")
     }
 
     override fun surfaceCreated(surface: Surface) {
@@ -48,6 +44,10 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
     override fun surfaceDestroyed() {
         nativePlayer.pause()
         nativePlayer.release()
+    }
+
+    companion object {
+        private const val TAG = "NativePlayerActivity"
     }
 
 }

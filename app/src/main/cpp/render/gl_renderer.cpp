@@ -3,7 +3,9 @@
 //
 
 #include "gl_renderer.h"
-#include "../filter/mediacodec_filter.h"
+#include "../filter/mediacodec_nv12_filter.h"
+#include "../common/native_log.h"
+#include "../filter/mediacodec_nv21_filter.h"
 #include <GLES3/gl3.h>
 
 gl_renderer::gl_renderer() {
@@ -39,10 +41,6 @@ void gl_renderer::surfaceCreated(ANativeWindow *nativeWindow) {
     glEnable(GL_BLEND);
 //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//    filter = new base_filter();
-    filter = new mediacodec_filter();
-    filter->init_program();
-
 }
 
 void gl_renderer::surfaceChanged(int width, int height) {
@@ -50,8 +48,8 @@ void gl_renderer::surfaceChanged(int width, int height) {
     glViewport(0, 0, width, height);
     windowSurface->swapBuffer();
 
-    filter->screen_width = width;
-    filter->screen_height = height;
+    screen_width = width;
+    screen_height = height;
 }
 
 void gl_renderer::surfaceDestroyed() {
@@ -75,7 +73,37 @@ void gl_renderer::surfaceDoFrame(AVFrame *avFrame) {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    initFilter(avFrame);
     filter->drawFrame(avFrame);
 
     windowSurface->swapBuffer();
+}
+
+void gl_renderer::initFilter(AVFrame *avFrame) {
+    if (filter != nullptr) {
+        return;
+    }
+    switch (avFrame->format) {
+        case AV_PIX_FMT_YUV420P: {
+            filter = new base_filter();
+            break;
+        }
+        case AV_PIX_FMT_NV12: {
+            filter = new mediacodec_nv12_filter();
+            break;
+        }
+        case AV_PIX_FMT_NV21: {
+            filter = new mediacodec_nv21_filter();
+            break;
+        }
+        default: {
+            ALOGE("not support this video type!");
+            break;
+        }
+    }
+    if (filter != nullptr) {
+        filter->screen_width = screen_width;
+        filter->screen_height = screen_height;
+        filter->init_program();
+    }
 }
