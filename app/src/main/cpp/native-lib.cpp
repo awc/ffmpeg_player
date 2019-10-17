@@ -10,6 +10,7 @@
 
 extern "C" {
 #include "libavcodec/avcodec.h"
+#include "libavcodec/jni.h"
 }
 
 #include "render/gl_looper.h"
@@ -260,6 +261,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(
         JavaVM *vm, void *reserved
 ) {
     g_vm = vm;
+    av_jni_set_java_vm(vm, nullptr);
     return JNI_VERSION_1_6;
 }
 

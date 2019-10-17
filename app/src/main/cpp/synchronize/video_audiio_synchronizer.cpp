@@ -13,16 +13,18 @@ video_audio_synchronizer::~video_audio_synchronizer() {
 }
 
 bool video_audio_synchronizer::syncVideo(int64_t pts, int64_t currentTimeMillis) {
-    if (pts <= currentTimeMillis) {
-        return true;
-    }
-    return false;
+//    if (pts <= currentTimeMillis) {
+//        return true;
+//    }
+//    return false;
+    return true;
 }
 
 bool video_audio_synchronizer::syncAudio(int64_t pts, int64_t currentTimeMillis) {
-    if (pts <= currentTimeMillis) {
-        return true;
-    }
-    return false;
+//    if (pts <= currentTimeMillis) {
+//        return true;
+//    }
+//    return false;
+    return true;
 }
 
