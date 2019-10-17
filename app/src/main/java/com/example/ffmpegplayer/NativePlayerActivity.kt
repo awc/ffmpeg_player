@@ -30,7 +30,7 @@ class NativePlayerActivity : AppCompatActivity(), ISurfaceCallback, IVideoListen
         nativePlayer = NativePlayer(applicationContext)
         nativePlayer.videoListener = this
         val path =
-            "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer.mp4")}"
+            "file://${File(Environment.getExternalStorageDirectory().absolutePath, "trailer111.mp4")}"
 //        val path =
 //            playerCacheServer.getProxyUrl("https://oimryzjfe.qnssl.com/content/0fcbbe738abf1bf524dc2e7818200cc8.mp4")
         nativePlayer.setDataSource(path)

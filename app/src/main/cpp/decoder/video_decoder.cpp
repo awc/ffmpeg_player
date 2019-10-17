@@ -139,6 +139,6 @@ void *video_decoder::trampoline(void *p) {
         vm->DetachCurrentThread();
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, "video", " decoder over");
+    ALOGD("decode video over!");
     return nullptr;
 }
