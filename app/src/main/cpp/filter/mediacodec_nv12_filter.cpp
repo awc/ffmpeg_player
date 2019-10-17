@@ -30,7 +30,6 @@ void mediacodec_nv12_filter::initFragmentShader() {
 
 void mediacodec_nv12_filter::createTextures() {
     yTexture = createTexture(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, yTexture);
     uvTexture = createTexture(GL_TEXTURE_2D);
 }
 
