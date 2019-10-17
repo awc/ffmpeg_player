@@ -29,8 +29,6 @@ add_library(native-lib
 
         src/main/cpp/synchronize/video_audiio_synchronizer.cpp
 
-        src/main/cpp/offscreen/off_screen_thread.cpp
-        src/main/cpp/offscreen/on_screen_thread.cpp
         src/main/cpp/encoder/video_encoder.cpp
 
         src/main/cpp/dexmuxer/av_demuxer.cpp

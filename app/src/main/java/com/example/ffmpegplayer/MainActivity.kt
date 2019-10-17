@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.ffmpegplayer.offScreen.OffScreenActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -35,10 +34,6 @@ class MainActivity : AppCompatActivity() {
         }
         playPipBtn.setOnClickListener {
             val intent = Intent(this, NativePipPlayerActivity::class.java)
-            startActivity(intent)
-        }
-        compileBtn.setOnClickListener {
-            val intent = Intent(this, OffScreenActivity::class.java)
             startActivity(intent)
         }
     }
