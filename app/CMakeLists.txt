@@ -19,7 +19,6 @@ add_library(native-lib
         src/main/cpp/filter/base_filter.cpp
         src/main/cpp/filter/mediacodec_nv12_filter.cpp
         src/main/cpp/filter/mediacodec_nv21_filter.cpp
-        src/main/cpp/filter/bg_filter.cpp
 
         src/main/cpp/decoder/video_decoder.cpp
         src/main/cpp/decoder/audio_decoder.cpp
