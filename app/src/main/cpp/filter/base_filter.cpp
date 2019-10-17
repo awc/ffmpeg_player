@@ -10,15 +10,12 @@ extern "C" {
 }
 
 base_filter::base_filter() {
-
+    initVertexShader();
+    initFragmentShader();
 }
 
 base_filter::~base_filter() {
-    auto textures = new GLuint[3];
-    textures[0] = yTexture;
-    textures[1] = uTexture;
-    textures[2] = vTexture;
-    glDeleteTextures(3, textures);
+    releaseTextures();
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -30,10 +27,7 @@ void base_filter::init_program() {
     fragmentShader = loadShader(GL_FRAGMENT_SHADER, fragment_shader_string);
     program = createShaderProgram(vertexShader, fragmentShader);
     initMatrix();
-
-    yTexture = createTexture(GL_TEXTURE_2D);
-    uTexture = createTexture(GL_TEXTURE_2D);
-    vTexture = createTexture(GL_TEXTURE_2D);
+    createTextures();
 }
 
 void base_filter::drawFrame(AVFrame *avFrame) {
@@ -57,28 +51,8 @@ void base_filter::drawFrame(AVFrame *avFrame) {
     uCoordMatrixLocation = glGetUniformLocation(program, uCoordinateMatrix);
     glUniformMatrix4fv(uCoordMatrixLocation, 1, GL_FALSE, this->uCoordMatrix->m);
 
-    uTextureYLocation = glGetUniformLocation(program, uTextureY);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, yTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width, avFrame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                 avFrame->data[0]);
-    glUniform1i(uTextureYLocation, 0);
-
-    uTextureULocation = glGetUniformLocation(program, uTextureU);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, uTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 avFrame->data[1]);
-    glUniform1i(uTextureULocation, 1);
-
-    uTextureVLocation = glGetUniformLocation(program, uTextureV);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, vTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 avFrame->data[2]);
-    glUniform1i(uTextureVLocation, 2);
+    //
+    drawTextures(avFrame);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glDisableVertexAttribArray(aPositionLocation);
@@ -131,3 +105,78 @@ void base_filter::initCoordMatrix() {
     uCoordMatrix = new ESMatrix();
     setIdentityM(uCoordMatrix);
 }
+
+void base_filter::initVertexShader() {
+    vertex_shader_string = {
+            "uniform mat4 uTextureMatrix;\n"
+            "attribute vec4 aPosition;\n"
+            "attribute vec4 aTextureCoordinate;\n"
+            "varying vec2 vTextureCoord;\n"
+            "uniform mat4 uCoordMatrix;\n"
+            "void main()\n"
+            "{\n"
+            "    vTextureCoord = (uTextureMatrix * aTextureCoordinate).xy;\n"
+            "    gl_Position = uCoordMatrix * aPosition;\n"
+            "}\n"
+    };
+}
+
+void base_filter::initFragmentShader() {
+    fragment_shader_string= {
+        "precision highp float;\n"
+        "uniform sampler2D uTextureY;\n"
+        "uniform sampler2D uTextureU;\n"
+        "uniform sampler2D uTextureV;\n"
+        "varying vec2 vTextureCoord;\n"
+        "void main()\n"
+        "{\n"
+        "float y = texture2D(uTextureY, vTextureCoord).r;\n"
+        "float u = texture2D(uTextureU, vTextureCoord).r - 0.5;\n"
+        "float v = texture2D(uTextureV, vTextureCoord).r - 0.5;\n"
+        "float r = y + 1.402 * v;\n"
+        "float g = y - 0.344 * u - 0.714 * v;\n"
+        "float b = y + 1.772 * u;\n"
+        "gl_FragColor = vec4(r,g,b,1.0);\n"
+        "}\n"
+    };
+}
+
+void base_filter::createTextures() {
+    yTexture = createTexture(GL_TEXTURE_2D);
+    uTexture = createTexture(GL_TEXTURE_2D);
+    vTexture = createTexture(GL_TEXTURE_2D);
+}
+
+void base_filter::drawTextures(AVFrame *avFrame) {
+    uTextureYLocation = glGetUniformLocation(program, uTextureY);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, yTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width, avFrame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 avFrame->data[0]);
+    glUniform1i(uTextureYLocation, 0);
+
+    uTextureULocation = glGetUniformLocation(program, uTextureU);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, uTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
+                 GL_UNSIGNED_BYTE,
+                 avFrame->data[1]);
+    glUniform1i(uTextureULocation, 1);
+
+    uTextureVLocation = glGetUniformLocation(program, uTextureV);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, vTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, avFrame->width / 2, avFrame->height / 2, 0, GL_LUMINANCE,
+                 GL_UNSIGNED_BYTE,
+                 avFrame->data[2]);
+    glUniform1i(uTextureVLocation, 2);
+}
+
+void base_filter::releaseTextures() {
+    auto textures = new GLuint[3];
+    textures[0] = yTexture;
+    textures[1] = uTexture;
+    textures[2] = vTexture;
+    glDeleteTextures(3, textures);
+}
+

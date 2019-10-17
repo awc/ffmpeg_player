@@ -95,7 +95,7 @@ void *video_decoder::trampoline(void *p) {
 
     double ratio = av_q2d(formatContext->streams[video_stream_index]->time_base) * 1000;
     int ret;
-    while (codecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
+    while (true) {
         if (av_read_frame(formatContext, packet) < 0) {
             ALOGD("read frame end")
             break;

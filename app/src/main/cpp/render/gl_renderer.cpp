@@ -3,6 +3,7 @@
 //
 
 #include "gl_renderer.h"
+#include "../filter/mediacodec_filter.h"
 #include <GLES3/gl3.h>
 
 gl_renderer::gl_renderer() {
@@ -38,11 +39,10 @@ void gl_renderer::surfaceCreated(ANativeWindow *nativeWindow) {
     glEnable(GL_BLEND);
 //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    filter = new base_filter();
+//    filter = new base_filter();
+    filter = new mediacodec_filter();
     filter->init_program();
 
-    bgFilter = new bg_filter();
-    bgFilter->init_program();
 }
 
 void gl_renderer::surfaceChanged(int width, int height) {
@@ -75,22 +75,7 @@ void gl_renderer::surfaceDoFrame(AVFrame *avFrame) {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    bgFilter->drawFrame(avFrame);
-
     filter->drawFrame(avFrame);
 
     windowSurface->swapBuffer();
-}
-
-void gl_renderer::surfaceDoFrames(AVFrame *avFrame, AVFrame *bgFrame) {
-//    glClearColor(0.0, 0.0, 0.0, 1.0);
-//    glClear(GL_COLOR_BUFFER_BIT);
-
-    if (bgFrame != nullptr && avFrame != nullptr) {
-        bgFilter->drawFrame(bgFrame);
-        filter->drawFrame(avFrame);
-        av_frame_free(&bgFrame);
-    }
-    windowSurface->swapBuffer();
-
 }

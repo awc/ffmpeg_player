@@ -17,8 +17,7 @@ public:
         kMsgSurfaceCreated,
         kMsgSurfaceChanged,
         kMsgSurfaceDestroyed,
-        kMsgSurfaceDoFrame,
-        kMsgSurfaceDoFrames
+        kMsgSurfaceDoFrame
     };
 
     gl_looper();

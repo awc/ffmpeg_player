@@ -30,8 +30,6 @@ public:
 
     void surfaceDoFrame(AVFrame *avFrame);
 
-    void surfaceDoFrames(AVFrame *avFrame, AVFrame *bgFrame);
-
 private:
 
     egl_core *eglCore;
@@ -40,7 +38,6 @@ private:
 
     base_filter *filter;
 
-    bg_filter *bgFilter;
 };
 
 #endif //FFMPEG_PLAYER_GL_RENDERER_H
