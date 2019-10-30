@@ -44,12 +44,12 @@ void *video_decoder::trampoline(void *p) {
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
-        ALOGD("can not open", url)
+        ALOGD("can not open %s, %s:%s", url, __FILE__, __func__);
         return nullptr;
     }
     //获取信息
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        ALOGD("can not find stream info", url)
+        ALOGD("can not find stream info %s", url);
         return nullptr;
     }
     //获取视频流的索引位置
@@ -61,7 +61,7 @@ void *video_decoder::trampoline(void *p) {
         }
     }
     if (video_stream_index == -1) {
-        ALOGD("can not find video stream info")
+        ALOGD("can not find video stream info");
         return nullptr;
     }
     AVCodecContext *codecContext = avcodec_alloc_context3(nullptr);
@@ -79,7 +79,7 @@ void *video_decoder::trampoline(void *p) {
     //
     //打开解码器
     if (avcodec_open2(codecContext, videoCodec, nullptr) < 0) {
-        ALOGD("can not open video decoder")
+        ALOGD("can not open video decoder");
         return nullptr;
     }
     //视频大小回调

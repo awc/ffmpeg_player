@@ -34,11 +34,11 @@ void *av_demuxer::trampoline(void *p) {
     circle_av_packet_queue *audio_queue = ((av_demuxer *) p)->audio_queue;
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
-        ALOGD("can not open", url)
+        ALOGD("can not open %s, %s:%s", url, __FILE__, __func__);
         return nullptr;
     }
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        ALOGD("can not find stream info", url)
+        ALOGD("can not find stream info %s", url);
         return nullptr;
     }
     //video
@@ -50,7 +50,7 @@ void *av_demuxer::trampoline(void *p) {
         }
     }
     if (video_stream_index == -1) {
-        ALOGD("can not find video stream info")
+        ALOGD("can not find video stream info");
         return nullptr;
     }
     //audio
@@ -62,14 +62,14 @@ void *av_demuxer::trampoline(void *p) {
         }
     }
     if (audio_stream_index == -1) {
-        ALOGD("can not find audio stream info")
+        ALOGD("can not find audio stream info");
         return nullptr;
     }
 
     while (true) {
         auto *packet = av_packet_alloc();
         if (av_read_frame(formatContext, packet) < 0) {
-            ALOGD("read frame end")
+            ALOGD("read frame end");
             break;
         }
         if (packet->stream_index == video_stream_index) {

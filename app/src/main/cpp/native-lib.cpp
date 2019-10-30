@@ -13,6 +13,7 @@ extern "C" {
 #include "libavcodec/jni.h"
 }
 
+#include "common/native_log.h"
 #include "render/gl_looper.h"
 #include "decoder/video_decoder.h"
 #include "decoder/audio_decoder.h"
@@ -84,6 +85,8 @@ av_demuxer *demuxer = nullptr;
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_ffmpegplayer_NativePlayer_nativePlayerInit(JNIEnv *env, jobject instance,
                                                             jboolean usingMediaCodec) {
+    ALOGD("nativePlayerInit");
+    ALOGD("%s", avcodec_configuration());
     videoDecoder = new video_decoder(usingMediaCodec);
     videoDecoder->vm = g_vm;
     audioDecoder = new audio_decoder();
@@ -105,7 +108,7 @@ Java_com_example_ffmpegplayer_NativeSurfaceView_nativeDoFrame(JNIEnv *env, jobje
     if (destoryed) {
         return;
     }
-    __android_log_print(ANDROID_LOG_DEBUG, "nativeDoFrame", "");
+    // ALOGD("nativeDoFrame");
     int64_t pts = video_queue->pullAVFramePts();
     if (pts == 0) {
         start_time = frameTimeMillis;
@@ -143,6 +146,7 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSource(JNIEnv *env
                                                                      jobject javaPlayer) {
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
+    ALOGD("open url: %s", path);
     if (videoDecoder != nullptr) {
         videoDecoder->decode(path, video_queue, javaPlayerRef);
     }
@@ -162,6 +166,7 @@ Java_com_example_ffmpegplayer_NativePlayer_nativePlayerSetDataSources(JNIEnv *en
                                                                       jobject javaPlayer) {
     javaPlayerRef = env->NewGlobalRef(javaPlayer);
     const char *path = env->GetStringUTFChars(url, nullptr);
+    ALOGD("open url: %s", path);
     if (videoDecoder != nullptr) {
         videoDecoder->decode(path, video_queue, javaPlayerRef);
     }

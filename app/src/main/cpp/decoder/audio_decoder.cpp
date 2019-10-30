@@ -38,12 +38,12 @@ void *audio_decoder::trampoline(void *p) {
     //封装格式上下文
     AVFormatContext *formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0) {
-        ALOGD("can not open ", url)
+        ALOGD("can not open %s, %s:%s", url, __FILE__, __func__);
         return nullptr;
     }
     //获取信息
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        ALOGD("can not find stream info", url)
+        ALOGD("can not find stream info: %s", url);
         return nullptr;
     }
     //获取音频流的索引位置
@@ -63,7 +63,7 @@ void *audio_decoder::trampoline(void *p) {
     AVCodec *videoCodec = avcodec_find_decoder(codecContext->codec_id);
     //打开解码器
     if (avcodec_open2(codecContext, videoCodec, nullptr) < 0) {
-        ALOGD("can not open video decoder")
+        ALOGD("can not open video decoder");
         return nullptr;
     }
 
@@ -98,7 +98,7 @@ void *audio_decoder::trampoline(void *p) {
             break;
         }
         if (av_read_frame(formatContext, packet) < 0) {
-            ALOGD("read frame end")
+            ALOGD("read frame end");
             break;
         }
         if (packet->stream_index == audio_stream_index) {

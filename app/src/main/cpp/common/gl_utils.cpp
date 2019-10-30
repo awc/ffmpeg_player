@@ -142,7 +142,7 @@ void checkActiveUniform(const GLuint program) {
 
         location = glGetUniformLocation(program, uniformName);
 
-        ALOGD("location:", location);
+        ALOGD("location: %d", location);
 
         switch (type) {
             case GL_FLOAT:
