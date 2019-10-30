@@ -104,8 +104,7 @@ target_link_libraries(native-lib
         )
 
 # Build the Oboe library
-# set(OBOE_DIR ../../../ndk/oboe)
-set(OBOE_DIR /opt/code/media/audio/android/oboe)
+set(OBOE_DIR ../../../ndk/oboe)
 add_subdirectory(${OBOE_DIR} ./oboe)
 
 # Make the Oboe public headers available to our app
